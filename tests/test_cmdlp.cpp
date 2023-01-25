@@ -10,24 +10,24 @@ void test_copy(cmdlp::OptionParser parser)
     std::cout << "-v : " << parser.getOption<bool>('v') << "\n";
 }
 
-int main(int argc, char *argv[])
+int main(int, char *argv[])
 {
-    std::vector<char *> dummy_argv;
-     dummy_argv.push_back(argv[0]);
-     dummy_argv.push_back((char *)"--double");
-     dummy_argv.push_back((char *)"0.00006456");
+    std::vector<char *> __argv;
+    __argv.push_back(argv[0]);
+    __argv.push_back((char *)"--double");
+    __argv.push_back((char *)"0.00006456");
 
-     dummy_argv.push_back((char *)"--int");
-     dummy_argv.push_back((char *)"42");
+    __argv.push_back((char *)"--int");
+    __argv.push_back((char *)"42");
 
-     dummy_argv.push_back((char *)"-s");
-     dummy_argv.push_back((char *)"Hello");
+    __argv.push_back((char *)"-s");
+    __argv.push_back((char *)"Hello");
 
-     dummy_argv.push_back((char *)"--verb");
+    __argv.push_back((char *)"--verb");
 
-     dummy_argv.push_back((char *)"--verbose");
+    __argv.push_back((char *)"--verbose");
 
-    cmdlp::OptionParser parser(static_cast<int>(dummy_argv.size() - 1), dummy_argv.data());
+    cmdlp::OptionParser parser(static_cast<int>(__argv.size() - 1), __argv.data());
     parser.addOption('d', "--double", "Double value", 0.2);
     parser.addOption('i', "--int", "An integer value", 1);
     parser.addOption('s', "--string", "A string.. actually, a single word", "hello");
@@ -35,6 +35,6 @@ int main(int argc, char *argv[])
     parser.parseOptions();
 
     test_copy(parser);
-
+    
     return 0;
 }

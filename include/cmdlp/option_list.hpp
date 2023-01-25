@@ -139,14 +139,16 @@ public:
         return options.end();
     }
 
-    inline std::size_t getLongestOption() const
+    template <typename T = std::size_t>
+    inline T getLongestOption() const
     {
-        return longest_option;
+        return static_cast<T>(longest_option);
     }
 
-    inline std::size_t getLongestValue() const
+    template <typename T = std::size_t>
+    inline T getLongestValue() const
     {
-        return longest_value;
+        return static_cast<T>(longest_value);
     }
 
     inline void updateLongestValue(std::size_t length)

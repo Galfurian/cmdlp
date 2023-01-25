@@ -101,8 +101,8 @@ public:
         std::stringstream ss;
         for (OptionList::const_iterator_t it = options.begin(); it != options.end(); ++it) {
             ss << "[" << (*it)->optc << "] ";
-            ss << std::setw(options.getLongestOption()) << std::left << (*it)->opts;
-            ss << " (" << std::setw(options.getLongestValue()) << std::right;
+            ss << std::setw(options.getLongestOption<int>()) << std::left << (*it)->opts;
+            ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
             if ((vopt = dynamic_cast<ValueOption *>(*it))) {
                 ss << vopt->value;
             } else if ((topt = dynamic_cast<ToggleOption *>(*it))) {
