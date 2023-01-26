@@ -62,31 +62,41 @@ public:
         ToggleOption *topt;
         std::string value;
         for (OptionList::const_iterator_t it = options.begin(); it != options.end(); ++it) {
-            if ((vopt = dynamic_cast<ValueOption *>(*it))) {
+            // Check if it is a value-holding option.
+            vopt = dynamic_cast<ValueOption *>(*it);
+            if (vopt) {
                 // Try to search '-*'
-                if (!(value = parser.getOption(vopt->optc)).empty()) {
+                value = parser.getOption(vopt->optc);
+                if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
+                    continue;
                 }
                 // Try to search '--***'
-                else if (!(value = parser.getOption(vopt->opts)).empty()) {
+                value = parser.getOption(vopt->opts);
+                if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
+                    continue;
                 }
                 // If we did not find the option, and the option is required, print an error.
-                else if (vopt->required) {
+                if (vopt->required) {
                     std::cerr << "Cannot find required option : " << vopt->opts << "[" << vopt->optc << "]\n";
                     std::cerr << this->getHelp() << "\n";
                     std::exit(1);
                 }
-            } else if ((topt = dynamic_cast<ToggleOption *>(*it))) {
-                // Try to search '-*'
-                if (parser.hasOption(topt->optc)) {
-                    topt->toggled = true;
-                }
-                // Try to search '--***'
-                else if (parser.hasOption(topt->opts)) {
-                    topt->toggled = true;
+            } else {
+                // Check if it is a toggle option.
+                topt = dynamic_cast<ToggleOption *>(*it);
+                if (topt) {
+                    // Try to search '-*'
+                    if (parser.hasOption(topt->optc)) {
+                        topt->toggled = true;
+                    }
+                    // Try to search '--***'
+                    else if (parser.hasOption(topt->opts)) {
+                        topt->toggled = true;
+                    }
                 }
             }
         }
@@ -103,10 +113,16 @@ public:
             ss << "[" << (*it)->optc << "] ";
             ss << std::setw(options.getLongestOption<int>()) << std::left << (*it)->opts;
             ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
-            if ((vopt = dynamic_cast<ValueOption *>(*it))) {
+            // Check if it is a value-holding option.
+            vopt = dynamic_cast<ValueOption *>(*it);
+            if (vopt) {
                 ss << vopt->value;
-            } else if ((topt = dynamic_cast<ToggleOption *>(*it))) {
-                ss << (topt->toggled ? "true" : "false");
+            } else {
+                // Check if it is a toggle option.
+                topt = dynamic_cast<ToggleOption *>(*it);
+                if (topt) {
+                    ss << (topt->toggled ? "true" : "false");
+                }
             }
             ss << ") : ";
             ss << (*it)->description << "\n";

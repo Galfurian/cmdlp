@@ -25,7 +25,7 @@ public:
         msg = ss.str();
     }
 
-    const char *what() const throw()
+    const char *what() const noexcept
     {
         return msg.c_str();
     }
