@@ -67,6 +67,8 @@ add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compilation flags.
 target_compile_options(${PROJECT_NAME} INTERFACE ${CMDLP_COMPILE_OPTIONS})
+# Set compiler flags.
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_11)
 
 # -----------------------------------------------------------------------------
 # TESTS
