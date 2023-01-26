@@ -85,18 +85,18 @@ public:
                     std::cerr << this->getHelp() << "\n";
                     std::exit(1);
                 }
-                continue;
-            }
-            // Check if it is a toggle option.
-            topt = dynamic_cast<ToggleOption *>(*it);
-            if (topt) {
-                // Try to search '-*'
-                if (parser.hasOption(topt->optc)) {
-                    topt->toggled = true;
-                }
-                // Try to search '--***'
-                else if (parser.hasOption(topt->opts)) {
-                    topt->toggled = true;
+            } else {
+                // Check if it is a toggle option.
+                topt = dynamic_cast<ToggleOption *>(*it);
+                if (topt) {
+                    // Try to search '-*'
+                    if (parser.hasOption(topt->optc)) {
+                        topt->toggled = true;
+                    }
+                    // Try to search '--***'
+                    else if (parser.hasOption(topt->opts)) {
+                        topt->toggled = true;
+                    }
                 }
             }
         }
