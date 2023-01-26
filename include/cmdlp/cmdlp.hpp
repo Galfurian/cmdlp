@@ -113,10 +113,16 @@ public:
             ss << "[" << (*it)->optc << "] ";
             ss << std::setw(options.getLongestOption<int>()) << std::left << (*it)->opts;
             ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
-            if ((vopt = dynamic_cast<ValueOption *>(*it))) {
+            // Check if it is a value-holding option.
+            vopt = dynamic_cast<ValueOption *>(*it);
+            if (vopt) {
                 ss << vopt->value;
-            } else if ((topt = dynamic_cast<ToggleOption *>(*it))) {
-                ss << (topt->toggled ? "true" : "false");
+            } else {
+                // Check if it is a toggle option.
+                topt = dynamic_cast<ToggleOption *>(*it);
+                if (topt) {
+                    ss << (topt->toggled ? "true" : "false");
+                }
             }
             ss << ") : ";
             ss << (*it)->description << "\n";
