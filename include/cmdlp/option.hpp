@@ -18,9 +18,7 @@ public:
     /// Description of the option.
     std::string description;
 
-    Option(std::string _optc,
-           std::string _opts,
-           std::string _description)
+    Option(std::string _optc, std::string _opts, std::string _description)
         : optc(std::move(_optc)),
           opts(std::move(_opts)),
           description(std::move(_description))
@@ -28,12 +26,9 @@ public:
         // Nothing to do.
     }
 
-    virtual std::size_t get_value_length() const = 0;
+    virtual ~Option() = default;
 
-    virtual ~Option()
-    {
-        // Nothing to do.
-    }
+    virtual std::size_t get_value_length() const = 0;
 };
 
 class ToggleOption : public Option {
@@ -41,20 +36,14 @@ public:
     /// If the option is toggled.
     bool toggled;
 
-    ToggleOption(std::string _optc,
-                 std::string _opts,
-                 std::string _description,
-                 bool _toggled = false)
+    ToggleOption(std::string _optc, std::string _opts, std::string _description, bool _toggled)
         : Option(_optc, _opts, _description),
           toggled(_toggled)
     {
         // Nothing to do.
     }
 
-    virtual ~ToggleOption()
-    {
-        // Nothing to do.
-    }
+    virtual ~ToggleOption() = default;
 
     virtual std::size_t get_value_length() const
     {
@@ -69,11 +58,7 @@ public:
     /// The option is required.
     bool required;
 
-    ValueOption(std::string _optc,
-                std::string _opts,
-                std::string _description,
-                std::string _value,
-                bool _required = false)
+    ValueOption(std::string _optc, std::string _opts, std::string _description, std::string _value, bool _required)
         : Option(_optc, _opts, _description),
           value(std::move(_value)),
           required(_required)
@@ -81,10 +66,7 @@ public:
         // Nothing to do.
     }
 
-    virtual ~ValueOption()
-    {
-        // Nothing to do.
-    }
+    virtual ~ValueOption() = default;
 
     virtual std::size_t get_value_length() const
     {

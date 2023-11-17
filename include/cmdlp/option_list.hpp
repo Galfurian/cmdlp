@@ -8,9 +8,11 @@
 
 #include <exception>
 #include <sstream>
+#include <vector>
 
 namespace cmdlp
 {
+
 class OptionExistException : public std::exception {
 private:
     std::string msg;
@@ -33,9 +35,9 @@ public:
 
 class OptionList {
 public:
-    typedef std::vector<Option *> option_list_t;
-    typedef std::vector<Option *>::iterator iterator_t;
-    typedef std::vector<Option *>::const_iterator const_iterator_t;
+    using option_list_t    = std::vector<Option *>;
+    using iterator_t       = std::vector<Option *>::iterator;
+    using const_iterator_t = std::vector<Option *>::const_iterator;
 
     /// @brief Construct a new Option List object.
     OptionList()
@@ -43,6 +45,7 @@ public:
           longest_option(),
           longest_value()
     {
+        // Nothing to do.
     }
 
     OptionList(const OptionList &other)
@@ -50,14 +53,16 @@ public:
           longest_option(other.longest_option),
           longest_value(other.longest_value)
     {
+        const ToggleOption *topt;
+        const ValueOption *vopt;
         for (const_iterator_t it = other.options.begin(); it != other.options.end(); ++it) {
             // First try to check if it is a value option.
-            const ValueOption *vopt = dynamic_cast<const ValueOption *>(*it);
+            vopt = dynamic_cast<const ValueOption *>(*it);
             if (vopt) {
                 options.emplace_back(new ValueOption(*vopt));
             } else {
                 // Then, check if it is a toggle option.
-                const ToggleOption *topt = dynamic_cast<const ToggleOption *>(*it);
+                topt = dynamic_cast<const ToggleOption *>(*it);
                 if (topt) {
                     options.emplace_back(new ToggleOption(*topt));
                 }
@@ -67,8 +72,9 @@ public:
 
     virtual ~OptionList()
     {
-        for (iterator_t it = options.begin(); it != options.end(); ++it)
+        for (iterator_t it = options.begin(); it != options.end(); ++it) {
             delete *it;
+        }
     }
 
     inline bool optionExhists(Option *option) const
@@ -117,16 +123,20 @@ public:
     inline void addOption(Option *option)
     {
         for (iterator_t it = options.begin(); it != options.end(); ++it) {
-            if ((*it)->optc == option->optc)
+            if ((*it)->optc == option->optc) {
                 throw OptionExistException(option, *it);
-            if ((*it)->opts == option->opts)
+            }
+            if ((*it)->opts == option->opts) {
                 throw OptionExistException(option, *it);
+            }
         }
         options.push_back(option);
-        if (option->opts.length() > longest_option)
+        if (option->opts.length() > longest_option) {
             longest_option = option->opts.length();
-        if (option->get_value_length() > longest_value)
+        }
+        if (option->get_value_length() > longest_value) {
             longest_value = option->get_value_length();
+        }
     }
 
     inline const_iterator_t begin() const
@@ -153,18 +163,25 @@ public:
 
     inline void updateLongestValue(std::size_t length)
     {
-        if (length > longest_value)
+        if (length > longest_value) {
             longest_value = length;
+        }
     }
 
 private:
+    option_list_t options;
+    std::size_t longest_option;
+    std::size_t longest_value;
+
     inline bool optionExhists(const std::string &optc, const std::string &opts) const
     {
         for (const_iterator_t it = options.begin(); it != options.end(); ++it) {
-            if (!optc.empty() && ((*it)->optc == optc))
+            if (!optc.empty() && ((*it)->optc == optc)) {
                 return true;
-            if (!opts.empty() && ((*it)->opts == opts))
+            }
+            if (!opts.empty() && ((*it)->opts == opts)) {
                 return true;
+            }
         }
         return false;
     }
@@ -172,10 +189,12 @@ private:
     Option *findOption(const std::string &optc, const std::string &opts) const
     {
         for (const_iterator_t it = options.begin(); it != options.end(); ++it) {
-            if (!optc.empty() && ((*it)->optc == optc))
+            if (!optc.empty() && ((*it)->optc == optc)) {
                 return *it;
-            if (!opts.empty() && ((*it)->opts == opts))
+            }
+            if (!opts.empty() && ((*it)->opts == opts)) {
                 return *it;
+            }
         }
         return NULL;
     }
@@ -188,12 +207,12 @@ private:
             // Create a stringstream to parse the values.
             std::stringstream ss;
             // First try to check if it is a value option.
-            ValueOption *vopt = dynamic_cast<ValueOption *>(option);
+            const ValueOption *vopt = dynamic_cast<const ValueOption *>(option);
             if (vopt) {
                 ss << vopt->value;
             } else {
                 // Then, check if it is a toggle option.
-                ToggleOption *topt = dynamic_cast<ToggleOption *>(option);
+                const ToggleOption *topt = dynamic_cast<const ToggleOption *>(option);
                 if (topt) {
                     ss << topt->toggled;
                 }
@@ -205,10 +224,6 @@ private:
         }
         return T(0);
     }
-
-    option_list_t options;
-    std::size_t longest_option;
-    std::size_t longest_value;
 };
 
 template <>
@@ -217,11 +232,13 @@ std::string OptionList::getOption(const std::string &optc, const std::string &op
     Option *option = this->findOption(optc, opts);
     if (option) {
         ValueOption *vopt = dynamic_cast<ValueOption *>(option);
-        if (vopt)
+        if (vopt) {
             return vopt->value;
+        }
         ToggleOption *topt = dynamic_cast<ToggleOption *>(option);
-        if (topt)
+        if (topt) {
             return topt->toggled ? "true" : "false";
+        }
     }
     return "";
 }

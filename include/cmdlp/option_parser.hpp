@@ -1,15 +1,15 @@
-/// @file cmdlp.hpp
+/// @file option_parser.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief
 
 #pragma once
 
-#include "line_parser.hpp"
-#include "option_list.hpp"
+#include "tokenizer.hpp"
 #include "option.hpp"
+#include "option_list.hpp"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include <sstream>
 
 namespace cmdlp
@@ -17,7 +17,7 @@ namespace cmdlp
 class OptionParser {
 public:
     OptionParser(int argc, char **argv)
-        : parser(argc, argv),
+        : tokenizer(argc, argv),
           options(),
           option_parsed()
     {
@@ -66,14 +66,14 @@ public:
             vopt = dynamic_cast<ValueOption *>(*it);
             if (vopt) {
                 // Try to search '-*'
-                value = parser.getOption(vopt->optc);
+                value = tokenizer.getOption(vopt->optc);
                 if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
                     continue;
                 }
                 // Try to search '--***'
-                value = parser.getOption(vopt->opts);
+                value = tokenizer.getOption(vopt->opts);
                 if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
@@ -90,11 +90,11 @@ public:
                 topt = dynamic_cast<ToggleOption *>(*it);
                 if (topt) {
                     // Try to search '-*'
-                    if (parser.hasOption(topt->optc)) {
+                    if (tokenizer.hasOption(topt->optc)) {
                         topt->toggled = true;
                     }
                     // Try to search '--***'
-                    else if (parser.hasOption(topt->opts)) {
+                    else if (tokenizer.hasOption(topt->opts)) {
                         topt->toggled = true;
                     }
                 }
@@ -131,7 +131,7 @@ public:
     }
 
 private:
-    LineParser parser;
+    Tokenizer tokenizer;
     OptionList options;
     bool option_parsed;
 };
