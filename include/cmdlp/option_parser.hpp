@@ -25,35 +25,29 @@ public:
     }
 
     template <typename T>
-    void addOption(char optc,
-                   const std::string &opts,
+    void addOption(const std::string &_opt_short,
+                   const std::string &_opt_long,
                    const std::string &_description,
                    const T &_value,
-                   bool _required = false)
+                   bool _required)
     {
         std::stringstream ss;
         ss << _value;
-        options.addOption(new ValueOption(cmdlp::optc_to_string(optc), opts, _description, ss.str(), _required));
+        options.addOption(new ValueOption(_opt_short, _opt_long, _description, ss.str(), _required));
     }
 
-    void addToggle(char optc,
-                   const std::string &opts,
+    void addToggle(const std::string &_opt_short,
+                   const std::string &_opt_long,
                    const std::string &_description,
-                   bool _toggled = false)
+                   bool _toggled)
     {
-        options.addOption(new ToggleOption(cmdlp::optc_to_string(optc), opts, _description, _toggled));
+        options.addOption(new ToggleOption(_opt_short, _opt_long, _description, _toggled));
     }
 
     template <typename T>
-    inline T getOption(const std::string &opts) const
+    inline T getOption(const std::string &opt) const
     {
-        return options.getOption<T>(opts);
-    }
-
-    template <typename T>
-    inline T getOption(char optc) const
-    {
-        return options.getOption<T>(optc);
+        return options.getOption<T>(opt);
     }
 
     void parseOptions()
@@ -66,14 +60,14 @@ public:
             vopt = dynamic_cast<ValueOption *>(*it);
             if (vopt) {
                 // Try to search '-*'
-                value = tokenizer.getOption(vopt->optc);
+                value = tokenizer.getOption(vopt->opt_short);
                 if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
                     continue;
                 }
                 // Try to search '--***'
-                value = tokenizer.getOption(vopt->opts);
+                value = tokenizer.getOption(vopt->opt_long);
                 if (!value.empty()) {
                     vopt->value = value;
                     options.updateLongestValue(value.length());
@@ -81,7 +75,7 @@ public:
                 }
                 // If we did not find the option, and the option is required, print an error.
                 if (vopt->required) {
-                    std::cerr << "Cannot find required option : " << vopt->opts << "[" << vopt->optc << "]\n";
+                    std::cerr << "Cannot find required option : " << vopt->opt_long << "[" << vopt->opt_short << "]\n";
                     std::cerr << this->getHelp() << "\n";
                     std::exit(1);
                 }
@@ -90,11 +84,11 @@ public:
                 topt = dynamic_cast<ToggleOption *>(*it);
                 if (topt) {
                     // Try to search '-*'
-                    if (tokenizer.hasOption(topt->optc)) {
+                    if (tokenizer.hasOption(topt->opt_short)) {
                         topt->toggled = true;
                     }
                     // Try to search '--***'
-                    else if (tokenizer.hasOption(topt->opts)) {
+                    else if (tokenizer.hasOption(topt->opt_long)) {
                         topt->toggled = true;
                     }
                 }
@@ -110,8 +104,8 @@ public:
         // Print the arguments.
         std::stringstream ss;
         for (OptionList::const_iterator_t it = options.begin(); it != options.end(); ++it) {
-            ss << "[" << (*it)->optc << "] ";
-            ss << std::setw(options.getLongestOption<int>()) << std::left << (*it)->opts;
+            ss << "[" << (*it)->opt_short << "] ";
+            ss << std::setw(options.getLongestOption<int>()) << std::left << (*it)->opt_long;
             ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
             // Check if it is a value-holding option.
             vopt = dynamic_cast<ValueOption *>(*it);

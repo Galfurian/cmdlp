@@ -11,16 +11,16 @@ namespace cmdlp
 
 class Option {
 public:
-    /// The character that identifies the option.
-    std::string optc;
+    /// The short version of the option.
+    const std::string opt_short;
     /// The entire word for the option.
-    std::string opts;
+    const std::string opt_long;
     /// Description of the option.
-    std::string description;
+    const std::string description;
 
-    Option(std::string _optc, std::string _opts, std::string _description)
-        : optc(std::move(_optc)),
-          opts(std::move(_opts)),
+    Option(std::string _opt_short, std::string _opt_long, std::string _description)
+        : opt_short(std::move(_opt_short)),
+          opt_long(std::move(_opt_long)),
           description(std::move(_description))
     {
         // Nothing to do.
@@ -36,8 +36,8 @@ public:
     /// If the option is toggled.
     bool toggled;
 
-    ToggleOption(std::string _optc, std::string _opts, std::string _description, bool _toggled)
-        : Option(_optc, _opts, _description),
+    ToggleOption(std::string _opt_short, std::string _opt_long, std::string _description, bool _toggled)
+        : Option(_opt_short, _opt_long, _description),
           toggled(_toggled)
     {
         // Nothing to do.
@@ -58,8 +58,8 @@ public:
     /// The option is required.
     bool required;
 
-    ValueOption(std::string _optc, std::string _opts, std::string _description, std::string _value, bool _required)
-        : Option(_optc, _opts, _description),
+    ValueOption(std::string _opt_short, std::string _opt_long, std::string _description, std::string _value, bool _required)
+        : Option(_opt_short, _opt_long, _description),
           value(std::move(_value)),
           required(_required)
     {
@@ -73,12 +73,5 @@ public:
         return value.size();
     }
 };
-
-static inline std::string &optc_to_string(char c)
-{
-    static std::string optcs = "-*";
-    optcs[1]                 = c;
-    return optcs;
-}
 
 } // namespace cmdlp
