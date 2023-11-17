@@ -28,6 +28,7 @@ int main(int, char *[])
     arguments.push_back((char *)"--verbose");
 
     cmdlp::OptionParser parser(static_cast<int>(arguments.size() - 1), arguments.data());
+    parser.addOption('h', "--help", "Shows this help for the program.", false);
     parser.addOption('d', "--double", "Double value", 0.2);
     parser.addOption('i', "--int", "An integer value", 1);
     parser.addOption('s', "--string", "A string.. actually, a single word", "hello");
@@ -35,6 +36,6 @@ int main(int, char *[])
     parser.parseOptions();
 
     test_copy(parser);
-    
+
     return 0;
 }

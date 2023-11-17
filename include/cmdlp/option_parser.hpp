@@ -21,7 +21,7 @@ public:
           options(),
           option_parsed()
     {
-        options.addOption(new ToggleOption("-h", "--help", "Shows this help for the program.", false));
+        // Nothing to do.
     }
 
     template <typename T>
