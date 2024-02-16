@@ -1,24 +1,24 @@
-/// @file line_parser.hpp
+/// @file tokenizer.hpp
 /// @author Enrico Fraccaroli (enry.frak@gmail.com)
 /// @brief
 
 #pragma once
 
 #include <algorithm>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace cmdlp
 {
 
-class LineParser {
+class Tokenizer {
 private:
     typedef std::vector<std::string> token_list_t;
 
     token_list_t tokens;
 
 public:
-    LineParser(int argc, char **argv)
+    Tokenizer(int argc, const char **argv)
     {
         for (int i = 1; i < argc; ++i) {
             tokens.push_back(std::string(argv[i]));
@@ -31,8 +31,9 @@ public:
     inline const std::string &getOption(const std::string &option) const
     {
         token_list_t::const_iterator it = std::find(tokens.begin(), tokens.end(), option);
-        if ((it != tokens.end()) && (++it != tokens.end())) {
-            if (!_starts_with(*it, "-")) {
+        if ((it != tokens.end()) && this->begin_with(*it, "-", false, 0) && !this->is_number(*it)) {
+            ++it;
+            if (it != tokens.end()) {
                 return (*it);
             }
         }
@@ -71,45 +72,51 @@ public:
     }
 
 private:
-    /// @brief Checks if the given string s starts with the given prefix.
-    /// @param source    the source string.
-    /// @param prefix    the prefix to check.
-    /// @param sensitive turn on/off sensitivity for capits/non-capitals
-    /// @param n         specify the minimum number of characters to check.
-    /// @return true  if the source starts with the prefix, give all the conditions.
-    /// @return false if the source does not start with the prefix, give all the conditions.
-    static inline bool _starts_with(
-        const std::string &source,
-        const std::string &prefix,
-        bool sensitive = false,
-        int n          = -1)
+    /// @brief Compares the two characters.
+    /// @param ch0 The first character.
+    /// @param ch1 The second character.
+    /// @param sensitive enables case-sensitive check.
+    /// @return true if the characters are equal.
+    /// @return false otherwise.
+    inline bool compare_char(char ch0, char ch1, bool sensitive) const
     {
-        if (&prefix == &source) {
+        return sensitive ? (ch0 == ch1) : (std::toupper(ch0) == std::toupper(ch1));
+    }
+
+    /// @brief Checks if the source string begins with a given string.
+    /// @param s source string.
+    /// @param prefix the prefix to check.
+    /// @param sensitive enables case-sensitive check.
+    /// @param n the number of characters to check (0 = all of prefix).
+    /// @return true if the string beings with the given prefix.
+    /// @return false otherwise.
+    inline bool begin_with(const std::string &s, const std::string &prefix, bool sensitive, unsigned n) const
+    {
+        if (&prefix == &s) {
             return true;
         }
-        if (prefix.length() > source.length()) {
+        if (prefix.length() > s.length()) {
             return false;
         }
-        if (source.empty() || prefix.empty()) {
+        if (s.empty() || prefix.empty()) {
             return false;
         }
-        std::string::const_iterator it0 = source.begin(), it1 = prefix.begin();
-        if (sensitive) {
-            while ((it1 != prefix.end()) && ((*it1) == (*it0))) {
-                if ((n > 0) && (--n <= 0)) {
-                    return true;
-                }
-                ++it0, ++it1;
+        std::string::const_iterator it0 = s.begin(), it1 = prefix.begin();
+        while ((it1 != prefix.end()) && this->compare_char(*it0, *it1, sensitive)) {
+            if ((n > 0) && (--n <= 0)) {
+                return true;
             }
-        } else {
-            while ((it1 != prefix.end()) && (tolower(*it1) == tolower(*it0))) {
-                if ((n > 0) && (--n <= 0)) {
-                    return true;
-                }
-                ++it0, ++it1;
-            }
+            ++it0, ++it1;
         }
         return it1 == prefix.end();
+    }
+
+    /// @brief Checks if the string is a number.
+    inline bool is_number(const std::string &s) const
+    {
+        std::string::const_iterator it = s.begin();
+        while (it != s.end() && std::isdigit(*it)) ++it;
+        return !s.empty() && it == s.end();
     }
 };
 
