@@ -16,7 +16,7 @@ namespace cmdlp
 {
 class OptionParser {
 public:
-    OptionParser(int argc, char **argv)
+    OptionParser(int argc, const char **argv)
         : tokenizer(argc, argv),
           options(),
           option_parsed()

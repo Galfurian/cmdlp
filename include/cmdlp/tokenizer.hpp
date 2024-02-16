@@ -18,7 +18,7 @@ private:
     token_list_t tokens;
 
 public:
-    Tokenizer(int argc, char **argv)
+    Tokenizer(int argc, const char **argv)
     {
         for (int i = 1; i < argc; ++i) {
             tokens.push_back(std::string(argv[i]));
@@ -31,8 +31,9 @@ public:
     inline const std::string &getOption(const std::string &option) const
     {
         token_list_t::const_iterator it = std::find(tokens.begin(), tokens.end(), option);
-        if ((it != tokens.end()) && (++it != tokens.end())) {
-            if (!this->begin_with(*it, "-", false, 0)) {
+        if ((it != tokens.end()) && this->begin_with(*it, "-", false, 0) && !this->is_number(*it)) {
+            ++it;
+            if (it != tokens.end()) {
                 return (*it);
             }
         }
@@ -108,6 +109,14 @@ private:
             ++it0, ++it1;
         }
         return it1 == prefix.end();
+    }
+
+    /// @brief Checks if the string is a number.
+    inline bool is_number(const std::string &s) const
+    {
+        std::string::const_iterator it = s.begin();
+        while (it != s.end() && std::isdigit(*it)) ++it;
+        return !s.empty() && it == s.end();
     }
 };
 
