@@ -8,19 +8,20 @@
 
 int main(int, char *[])
 {
-    std::vector<const char *> arguments;
-    arguments.push_back("test_cmdlp");
-    arguments.push_back("--double");
-    arguments.push_back("0.00006456");
-    arguments.push_back("--int");
-    arguments.push_back("-42");
-    arguments.push_back("-u");
-    arguments.push_back("17");
-    arguments.push_back("-s");
-    arguments.push_back("Hello");
-    arguments.push_back("--verbose");
+    std::vector<const char *> arguments = {
+        "test_cmdlp",
+        "--double",
+        "0.00006456",
+        "--int",
+        "-42",
+        "-u",
+        "17",
+        "-s",
+        "Hello",
+        "--verbose",
+    };
 
-    cmdlp::OptionParser parser(static_cast<int>(arguments.size()), arguments.data());
+    cmdlp::OptionParser parser(static_cast<int>(arguments.size()), const_cast<char **>(arguments.data()));
     parser.addOption("-h", "--help", "Shows this help for the program.", false, false);
     parser.addOption("-d", "--double", "Double value", 0.2, false);
     parser.addOption("-i", "--int", "An integer value", -1, false);

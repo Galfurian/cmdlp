@@ -18,7 +18,7 @@ private:
     token_list_t tokens;
 
 public:
-    Tokenizer(int argc, const char **argv)
+    Tokenizer(int argc, char **argv)
     {
         for (int i = 1; i < argc; ++i) {
             tokens.push_back(std::string(argv[i]));
