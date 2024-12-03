@@ -104,11 +104,7 @@ public:
                         } else {
                             continue;
                         }
-                    } else {
-                        std::cout << "Found value: " << value << ", for option: " << vopt->opt_short << "\n";
                     }
-                } else {
-                    std::cout << "Found value: " << value << ", for option: " << vopt->opt_short << "\n";
                 }
                 vopt->value = value;
                 options.updateLongestValue(vopt->value.length());
@@ -117,7 +113,6 @@ public:
             else if ((topt = dynamic_cast<detail::ToggleOption *>(*it))) {
                 if (tokenizer.hasOption(topt->opt_short) || tokenizer.hasOption(topt->opt_long)) {
                     topt->toggled = true;
-                    std::cout << "Found option: " << topt->opt_short << "\n";
                 }
             }
         }
