@@ -128,7 +128,9 @@ public:
           selected_value(std::move(_default_value))
     {
         if (!this->isValueAllowed(selected_value)) {
-            throw std::invalid_argument("Default value is not in the list of allowed values.");
+            std::ostringstream oss;
+            oss << "Value \"" << selected_value << "\" is not in the list of allowed values: " << print_list();
+            throw std::invalid_argument(oss.str());
         }
     }
 
@@ -141,7 +143,9 @@ public:
     void setValue(const std::string &value)
     {
         if (!this->isValueAllowed(value)) {
-            throw std::invalid_argument("Value is not in the list of allowed values.");
+            std::ostringstream oss;
+            oss << "Value \"" << value << "\" is not in the list of allowed values: " << print_list();
+            throw std::invalid_argument(oss.str());
         }
         selected_value = value;
     }
