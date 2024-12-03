@@ -189,4 +189,23 @@ private:
     }
 };
 
+/// @class Separator
+/// @brief A special type of option used for grouping and labeling sections in help messages.
+class Separator : public Option {
+public:
+    /// @brief Constructs a `Separator` object.
+    /// @param _description The description of the separator (e.g., a section title).
+    explicit Separator(std::string _description)
+        : Option("", "", std::move(_description))
+    {
+    }
+
+    /// @brief Retrieves the length of the value associated with the separator.
+    /// @return Always returns 0 as separators do not have values.
+    virtual std::size_t get_value_length() const override
+    {
+        return 0;
+    }
+};
+
 } // namespace cmdlp::detail

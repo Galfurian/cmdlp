@@ -146,12 +146,23 @@ public:
     /// @throws OptionExistException if the option already exists.
     inline void addOption(Option *option)
     {
+        // If the option is a separator, skip all checks.
+        if (dynamic_cast<detail::Separator *>(option)) {
+            options.push_back(option);
+            return;
+        }
+
+        // Check if the option already exists in the list of options.
         for (iterator_t it = options.begin(); it != options.end(); ++it) {
             if ((*it)->opt_short == option->opt_short || (*it)->opt_long == option->opt_long) {
                 throw OptionExistException(option, *it);
             }
         }
+
+        // Add the option to the list of options.
         options.push_back(option);
+
+        // Update the length of the `longest` parameters.
         if (option->opt_short.length() > longest_short_option) {
             longest_short_option = option->opt_short.length();
         }

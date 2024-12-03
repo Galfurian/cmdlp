@@ -88,6 +88,14 @@ public:
         options.addOption(option);
     }
 
+    /// @brief Adds a separator for grouping options in the help message.
+    /// @param _description The description of the separator (e.g., section title).
+    void addSeparator(const std::string &_description)
+    {
+        auto separator = new detail::Separator(_description);
+        options.addOption(separator);
+    }
+
     /// @brief Retrieves the value of an option.
     /// @tparam T The expected type of the option value.
     /// @param opt The short or long name of the option.
@@ -162,26 +170,31 @@ public:
     {
         std::stringstream ss;
         for (detail::OptionList::const_iterator_t it = options.begin(); it != options.end(); ++it) {
-            detail::ValueOption *vopt  = nullptr;
-            detail::ToggleOption *topt = nullptr;
-            detail::MultiOption *mopt  = nullptr;
-
-            ss << "[" << std::setw(options.getLongestShortOption<int>()) << std::left << (*it)->opt_short << "] ";
-            ss << std::setw(options.getLongestLongOption<int>()) << std::left << (*it)->opt_long;
-            ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
-            if ((vopt = dynamic_cast<detail::ValueOption *>(*it))) {
-                ss << vopt->value;
-            } else if ((topt = dynamic_cast<detail::ToggleOption *>(*it))) {
-                ss << (topt->toggled ? "true" : "false");
-            } else if ((mopt = dynamic_cast<detail::MultiOption *>(*it))) {
-                ss << mopt->selected_value;
+            const detail::Separator *sep = nullptr;
+            if ((sep = dynamic_cast<const detail::Separator *>(*it))) {
+                ss << "\n"
+                   << sep->description << "\n";
+            } else {
+                const detail::ValueOption *vopt  = nullptr;
+                const detail::ToggleOption *topt = nullptr;
+                const detail::MultiOption *mopt  = nullptr;
+                ss << "[" << std::setw(options.getLongestShortOption<int>()) << std::left << (*it)->opt_short << "] ";
+                ss << std::setw(options.getLongestLongOption<int>()) << std::left << (*it)->opt_long;
+                ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
+                if ((vopt = dynamic_cast<const detail::ValueOption *>(*it))) {
+                    ss << vopt->value;
+                } else if ((topt = dynamic_cast<const detail::ToggleOption *>(*it))) {
+                    ss << (topt->toggled ? "true" : "false");
+                } else if ((mopt = dynamic_cast<const detail::MultiOption *>(*it))) {
+                    ss << mopt->selected_value;
+                }
+                ss << ") : ";
+                ss << (*it)->description;
+                if (mopt) {
+                    ss << " " << mopt->print_list();
+                }
+                ss << "\n";
             }
-            ss << ") : ";
-            ss << (*it)->description;
-            if (mopt) {
-                ss << " " << mopt->print_list();
-            }
-            ss << "\n";
         }
         return ss.str();
     }
