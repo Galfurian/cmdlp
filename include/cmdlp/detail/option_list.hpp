@@ -70,17 +70,16 @@ public:
           longest_long_option(other.longest_long_option),
           longest_value(other.longest_value)
     {
+        const MultiOption *mopt;
         const ToggleOption *topt;
         const ValueOption *vopt;
         for (const_iterator_t it = other.options.begin(); it != other.options.end(); ++it) {
-            vopt = dynamic_cast<const ValueOption *>(*it);
-            if (vopt) {
+            if ((vopt = dynamic_cast<const ValueOption *>(*it))) {
                 options.emplace_back(new ValueOption(*vopt));
-            } else {
-                topt = dynamic_cast<const ToggleOption *>(*it);
-                if (topt) {
-                    options.emplace_back(new ToggleOption(*topt));
-                }
+            } else if ((topt = dynamic_cast<const ToggleOption *>(*it))) {
+                options.emplace_back(new ToggleOption(*topt));
+            } else if ((mopt = dynamic_cast<const MultiOption *>(*it))) {
+                options.emplace_back(new MultiOption(*mopt));
             }
         }
     }
@@ -124,13 +123,16 @@ public:
     {
         const Option *option = this->findOption(option_string);
         if (option) {
-            const ValueOption *vopt;
+            const MultiOption *mopt;
             const ToggleOption *topt;
+            const ValueOption *vopt;
             std::stringstream ss;
             if ((vopt = dynamic_cast<const ValueOption *>(option))) {
                 ss << vopt->value;
             } else if ((topt = dynamic_cast<const ToggleOption *>(option))) {
                 ss << topt->toggled;
+            } else if ((mopt = dynamic_cast<const MultiOption *>(option))) {
+                ss << mopt->selected_value;
             }
             T data;
             ss >> data;
@@ -228,13 +230,15 @@ std::string OptionList::getOption(const std::string &option_string) const
 {
     const Option *option = this->findOption(option_string);
     if (option) {
-        const ValueOption *vopt = dynamic_cast<const ValueOption *>(option);
-        if (vopt) {
+        const MultiOption *mopt;
+        const ToggleOption *topt;
+        const ValueOption *vopt;
+        if ((vopt = dynamic_cast<const ValueOption *>(option))) {
             return vopt->value;
-        }
-        const ToggleOption *topt = dynamic_cast<const ToggleOption *>(option);
-        if (topt) {
+        } else if ((topt = dynamic_cast<const ToggleOption *>(option))) {
             return topt->toggled ? "true" : "false";
+        } else if ((mopt = dynamic_cast<const MultiOption *>(option))) {
+            return mopt->selected_value;
         }
     }
     return "";

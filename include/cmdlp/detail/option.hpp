@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <stdexcept>
+#include <sstream>
 #include <string>
 
 namespace cmdlp::detail
@@ -102,6 +104,84 @@ public:
     virtual std::size_t get_value_length() const
     {
         return value.size();
+    }
+};
+
+/// @class MultiOption
+/// @brief A command-line option that allows selecting from a predefined set of values.
+class MultiOption : public Option {
+public:
+    /// @brief The set of allowed values for this option.
+    const std::vector<std::string> allowed_values;
+    /// @brief The selected value for this option.
+    std::string selected_value;
+
+    /// @brief Constructs a `MultiOption` object.
+    /// @param _opt_short The short version of the option (e.g., "-m").
+    /// @param _opt_long The long version of the option (e.g., "--mode").
+    /// @param _description The description of the option.
+    /// @param _allowed_values The set of allowed values for the option.
+    /// @param _default_value The default value for the option.
+    MultiOption(std::string _opt_short, std::string _opt_long, std::string _description, std::vector<std::string> _allowed_values, std::string _default_value)
+        : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description)),
+          allowed_values(std::move(_allowed_values)),
+          selected_value(std::move(_default_value))
+    {
+        if (!this->isValueAllowed(selected_value)) {
+            throw std::invalid_argument("Default value is not in the list of allowed values.");
+        }
+    }
+
+    /// @brief Virtual destructor.
+    virtual ~MultiOption() = default;
+
+    /// @brief Sets the selected value for this option.
+    /// @param value The value to set.
+    /// @throws std::invalid_argument if the value is not in the list of allowed values.
+    void setValue(const std::string &value)
+    {
+        if (!this->isValueAllowed(value)) {
+            throw std::invalid_argument("Value is not in the list of allowed values.");
+        }
+        selected_value = value;
+    }
+
+    /// @brief Retrieves the length of the selected value.
+    /// @return The length of the selected value as a `std::size_t`.
+    virtual std::size_t get_value_length() const override
+    {
+        std::size_t max_length = 0;
+        for (const auto &value : allowed_values) {
+            if (value.size() > max_length) {
+                max_length = value.size();
+            }
+        }
+        return max_length;
+    }
+
+    /// @brief Prints the list of allowed values.
+    /// @return A formatted string containing all allowed values.
+    std::string print_list() const
+    {
+        std::ostringstream oss;
+        oss << "[";
+        for (size_t i = 0; i < allowed_values.size(); ++i) {
+            oss << allowed_values[i];
+            if (i < allowed_values.size() - 1) {
+                oss << ", ";
+            }
+        }
+        oss << "]";
+        return oss.str();
+    }
+
+private:
+    /// @brief Checks if a value is allowed.
+    /// @param value The value to check.
+    /// @return True if the value is in the allowed values, false otherwise.
+    bool isValueAllowed(const std::string &value) const
+    {
+        return std::find(allowed_values.begin(), allowed_values.end(), value) != allowed_values.end();
     }
 };
 
