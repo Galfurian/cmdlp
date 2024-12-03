@@ -34,6 +34,7 @@ mark_as_advanced(FORCE
 # -----------------------------------------------------------------------------
 
 option(BUILD_TESTS "Build tests" OFF)
+option(BUILD_EXAMPLES "Build examples" ON)
 option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
 
@@ -48,23 +49,23 @@ find_package(Doxygen)
 # -----------------------------------------------------------------------------
 
 # Add the C++ Library.
-add_library(${PROJECT_NAME} INTERFACE)
-add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
+add_library(cmdlp INTERFACE)
+add_library(cmdlp::cmdlp ALIAS cmdlp)
 # Inlcude header directories and set the library.
-target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(cmdlp INTERFACE ${PROJECT_SOURCE_DIR}/include)
 
 # -----------------------------------------------------------------------------
 # COMPILATION FLAGS
 # -----------------------------------------------------------------------------
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings that suggest using MSVC-specific safe functions
-    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(cmdlp INTERFACE _CRT_SECURE_NO_WARNINGS)
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
+        target_compile_options(cmdlp INTERFACE /WX)
     endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WARNINGS_AS_ERRORS)
-        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
+        target_compile_options(cmdlp INTERFACE -Werror)
     endif()
 endif()
 
@@ -72,15 +73,30 @@ if(STRICT_WARNINGS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
         # Mark system headers as external for MSVC explicitly
         # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
-        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
-        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
+        target_compile_options(cmdlp INTERFACE /experimental:external)
+        target_compile_options(cmdlp INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(cmdlp INTERFACE /external:anglebrackets)
+        target_compile_options(cmdlp INTERFACE /external:W0)
 
-        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
+        target_compile_options(cmdlp INTERFACE /W4)
     elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(${PROJECT_NAME} INTERFACE -Wall -Wextra -Wconversion -pedantic)
+        target_compile_options(cmdlp INTERFACE -Wall -Wextra -Wconversion -pedantic)
     endif()
+endif()
+
+# -----------------------------------------------------------------------------
+# EXAMPLES
+# -----------------------------------------------------------------------------
+
+if(BUILD_EXAMPLES)
+    # Add the example.
+    add_executable(cmdlp_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
+    # Inlcude header directories.
+    target_include_directories(cmdlp_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    # Liking for the test.
+    target_link_libraries(cmdlp_example cmdlp)
+    # Add the test.
+    add_test(cmdlp_example_run cmdlp_example)
 endif()
 
 # -----------------------------------------------------------------------------
@@ -96,13 +112,13 @@ if(BUILD_TESTS)
     # TEST
     # -------------------------------------
     # Add the test.
-    add_executable(${PROJECT_NAME}_test_cmdlp ${PROJECT_SOURCE_DIR}/tests/test_cmdlp.cpp)
+    add_executable(cmdlp_test_cmdlp ${PROJECT_SOURCE_DIR}/tests/test_cmdlp.cpp)
     # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_test_cmdlp PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(cmdlp_test_cmdlp PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Liking for the test.
-    target_link_libraries(${PROJECT_NAME}_test_cmdlp ${PROJECT_NAME})
+    target_link_libraries(cmdlp_test_cmdlp cmdlp)
     # Add the test.
-    add_test(${PROJECT_NAME}_test_cmdlp_run ${PROJECT_NAME}_test_cmdlp)
+    add_test(cmdlp_test_cmdlp_run cmdlp_test_cmdlp)
 
 endif()
 
@@ -134,7 +150,7 @@ if(DOXYGEN_FOUND)
 
     # = CUSTOMIZATION =========================================================
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
-    set(DOXYGEN_PROJECT_NAME ${PROJECT_NAME})
+    set(DOXYGEN_PROJECT_NAME cmdlp)
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
     set(DOXYGEN_SHOW_INCLUDE_FILES NO)
     set(DOXYGEN_GENERATE_TREEVIEW YES)
@@ -146,7 +162,7 @@ if(DOXYGEN_FOUND)
         ${doxygenawesome_SOURCE_DIR}/doxygen-awesome-darkmode-toggle.js
     )
     doxygen_add_docs(
-        ${PROJECT_NAME}_documentation
+        cmdlp_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/include/cmdlp/cmdlp.hpp
         ${PROJECT_SOURCE_DIR}/include/cmdlp/line_parser.hpp

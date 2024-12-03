@@ -1,4 +1,4 @@
-#include "cmdlp/option_parser.hpp"
+#include "cmdlp/parser.hpp"
 
 #define TEST_OPTION(OPT, VALUE)                                                          \
     if (OPT != VALUE) {                                                                  \
@@ -21,7 +21,7 @@ int main(int, char *[])
         "--verbose",
     };
 
-    cmdlp::OptionParser parser(static_cast<int>(arguments.size()), const_cast<char **>(arguments.data()));
+    cmdlp::Parser parser(static_cast<int>(arguments.size()), const_cast<char **>(arguments.data()));
     parser.addOption("-h", "--help", "Shows this help for the program.", false, false);
     parser.addOption("-d", "--double", "Double value", 0.2, false);
     parser.addOption("-i", "--int", "An integer value", -1, false);
