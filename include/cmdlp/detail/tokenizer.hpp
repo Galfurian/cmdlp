@@ -64,18 +64,18 @@ private:
     /// @param token The token to check.
     /// @return True if the token starts with '-', false otherwise.
     /// @details Checks whether the given token starts with a '-' character, indicating it is an option.
-    inline bool isOption(const std::string &token) const
+    static inline bool isOption(const std::string &token)
     {
-        return !token.empty() && token[0] == '-';
+        return (!token.empty()) && (token[0] == '-') && !isNumber(token);
     }
 
     /// @brief Determines whether a token represents a number.
     /// @param token The token to check.
     /// @return True if the token represents a number, false otherwise.
     /// @details Checks if the given token contains only digit characters, indicating it is a numeric value.
-    inline bool isNumber(const std::string &token) const
+    static inline bool isNumber(const std::string &token)
     {
-        return !token.empty() && std::all_of(token.begin(), token.end(), ::isdigit);
+        return !token.empty() && (token.find_first_not_of("-.eE0123456789") == std::string::npos);
     }
 };
 

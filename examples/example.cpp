@@ -30,9 +30,9 @@ int main(int argc, char *argv[])
 
     // Retrieve and display parsed options.
     std::cout << "Parsed options:\n";
-    std::cout << "    Double    (-db) : " << parser.getOption<std::string>("--double") << "\n";
-    std::cout << "    Integer   (-i)  : " << parser.getOption<std::string>("--int") << "\n";
-    std::cout << "    Unsigned  (-u)  : " << parser.getOption<std::string>("--unsigned") << "\n";
+    std::cout << "    Double    (-db) : " << parser.getOption<double>("--double") << "\n";
+    std::cout << "    Integer   (-i)  : " << parser.getOption<int>("--int") << "\n";
+    std::cout << "    Unsigned  (-u)  : " << parser.getOption<unsigned>("--unsigned") << "\n";
     std::cout << "    String    (-s)  : " << parser.getOption<std::string>("--string") << "\n\n";
 
     std::cout << "    Help      (-h)  : " << parser.getOption<bool>("--help") << "\n";

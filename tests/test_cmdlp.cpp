@@ -3,6 +3,7 @@
 #define TEST_OPTION(OPT, VALUE)                                                          \
     if (OPT != VALUE) {                                                                  \
         std::cerr << "The option `" << OPT << "` is different than `" << VALUE << "`\n"; \
+        std::cerr << parser.getHelp() << "`\n";                                          \
         return 1;                                                                        \
     }
 
