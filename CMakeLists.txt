@@ -53,6 +53,8 @@ add_library(cmdlp INTERFACE)
 add_library(cmdlp::cmdlp ALIAS cmdlp)
 # Inlcude header directories and set the library.
 target_include_directories(cmdlp INTERFACE ${PROJECT_SOURCE_DIR}/include)
+# Set compiler flags.
+target_compile_features(cmdlp INTERFACE cxx_std_11)
 
 # -----------------------------------------------------------------------------
 # COMPILATION FLAGS

@@ -8,7 +8,10 @@
 #include <sstream>
 #include <string>
 
-namespace cmdlp::detail
+namespace cmdlp
+{
+
+namespace detail
 {
 
 /// @class Option
@@ -208,4 +211,6 @@ public:
     }
 };
 
-} // namespace cmdlp::detail
+} // namespace detail
+
+} // namespace cmdlp

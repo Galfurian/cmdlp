@@ -10,7 +10,10 @@
 #include <sstream>
 #include <vector>
 
-namespace cmdlp::detail
+namespace cmdlp
+{
+
+namespace detail
 {
 
 /// @class OptionExistException
@@ -255,4 +258,6 @@ std::string OptionList::getOption(const std::string &option_string) const
     return "";
 }
 
-} // namespace cmdlp::detail
+} // namespace detail
+
+} // namespace cmdlp

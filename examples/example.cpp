@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     parser.addOption("-db", "--double", "Double value", 0.2, false);
     parser.addOption("-i", "--int", "An integer value", -1, false);
     parser.addOption("-u", "--unsigned", "An unsigned value", 1, false);
-    parser.addOption("-s", "--string", "A string.. actually, a single word", "hello", false);
+    parser.addOption("-s", "--string", "A string.. actually, a single word", "hello", true);
 
     parser.addSeparator("Toggle options:");
     parser.addToggle("-h", "--help", "Shows this help for the program.", false);

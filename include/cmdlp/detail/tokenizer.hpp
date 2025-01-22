@@ -9,7 +9,9 @@
 #include <algorithm>
 #include <cctype>
 
-namespace cmdlp::detail
+namespace cmdlp
+{
+namespace detail
 {
 
 /// @class Tokenizer
@@ -79,4 +81,6 @@ private:
     }
 };
 
-} // namespace cmdlp::detail
+} // namespace detail
+
+} // namespace cmdlp
