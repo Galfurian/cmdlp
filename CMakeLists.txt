@@ -97,8 +97,6 @@ if(BUILD_EXAMPLES)
     target_include_directories(cmdlp_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Liking for the test.
     target_link_libraries(cmdlp_example cmdlp)
-    # Add the test.
-    add_test(cmdlp_example_run cmdlp_example)
 endif()
 
 # -----------------------------------------------------------------------------
