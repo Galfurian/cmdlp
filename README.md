@@ -63,8 +63,6 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-### Example Output
-
 Running the above program with the following arguments:
 
 ```bash
@@ -76,7 +74,7 @@ Produces:
 ```bash
 Double value: 3.14
 Integer value: 42
-Help: true
+Help: 1
 ```
 
 ## Example
@@ -113,8 +111,6 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-### Example Output
-
 Running with:
 
 ```bash
@@ -124,74 +120,40 @@ Running with:
 Produces:
 
 ```bash
-Help:
+Help: 
+
 General Options:
-  -db, --double (0.5) : Double value
-  -i, --int (-1)      : Integer value
+[-db] --double  (   0.5) : Double value
+[-i ] --int     (    -1) : Integer value
+
 Toggle Options:
-  -v, --verbose (false) : Enable verbose mode
+[-v ] --verbose ( false) : Enable verbose mode
+
 Multi-value Options:
-  -m, --mode (auto)   : Operation mode [auto, manual]
+[-m ] --mode    (  auto) : Operation mode [auto, manual]
 
-Parsed Options:
-  Double: 3.14
-  Integer: 42
-  Verbose: true
-  Mode: manual
-```
-
-## Tests
-
-To verify the correctness of the library, compile and run the test file:
-
-```cpp
-#include "cmdlp/parser.hpp"
-#define TEST_OPTION(OPT, VALUE)                                                              if (OPT != VALUE) {                                                                          std::cerr << "The option `" << OPT << "` is different than `" << VALUE << "`\n";         std::cerr << parser.getHelp() << "\n";                                                  return 1;                                                                            }
-
-int main(int, char *[]) {
-    std::vector<const char *> arguments = {
-        "test_cmdlp",
-        "--double", "0.00006456",
-        "--int", "-42",
-        "-u", "17",
-        "-s", "Hello",
-        "--verbose",
-    };
-
-    cmdlp::Parser parser(static_cast<int>(arguments.size()), const_cast<char **>(arguments.data()));
-    parser.addOption("-d", "--double", "Double value", 0.2, false);
-    parser.addOption("-i", "--int", "An integer value", -1, false);
-    parser.addOption("-u", "--unsigned", "An unsigned value", 1, false);
-    parser.addOption("-s", "--string", "A string", "hello", false);
-    parser.addToggle("-v", "--verbose", "Verbose output", false);
-    parser.parseOptions();
-
-    TEST_OPTION(parser.getOption<double>("-d"), 0.00006456);
-    TEST_OPTION(parser.getOption<int>("-i"), -42);
-    TEST_OPTION(parser.getOption<int>("-u"), 17);
-    TEST_OPTION(parser.getOption<std::string>("-s"), "Hello");
-    TEST_OPTION(parser.getOption<bool>("-v"), true);
-
-    return 0;
-}
-```
-
-Run:
-
-```bash
-g++ test.cpp -o test && ./test
+Parsed Options: 
+  Double: 0.5
+  Integer: -1
+  Verbose: 0
+  Mode: auto
 ```
 
 ## API Reference
 
 ### Key Classes
 
+The class that the user is mean to rely upon:
+
+- **Parser**: Central class for defining and parsing options.
+
+The other support classes:
+
 - **Tokenizer**: Parses raw command-line arguments.
 - **Option**: Base class for all options.
   - **ValueOption**: Represents options with a single value.
   - **ToggleOption**: Represents boolean flags.
   - **MultiOption**: Represents options with predefined values.
-- **Parser**: Central class for defining and parsing options.
 
 ## Contributing
 
@@ -199,4 +161,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests to e
 
 ## License
 
-The code is completely unlicensed.
+This is free and unencumbered software released into the public domain (see `LICENSE.md`).
