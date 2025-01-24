@@ -12,6 +12,10 @@
 #include <iostream>
 #include <sstream>
 
+#define CMDLP_MAJOR_VERSION 1 ///< Major version of the library.
+#define CMDLP_MINOR_VERSION 0 ///< Minor version of the library.
+#define CMDLP_MICRO_VERSION 0 ///< Micro version of the library.
+
 namespace cmdlp
 {
 
