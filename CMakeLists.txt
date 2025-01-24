@@ -213,6 +213,7 @@ if(DOXYGEN_FOUND)
     doxygen_add_docs(
         cmdlp_documentation
         ${PROJECT_SOURCE_DIR}/README.md
+        ${PROJECT_SOURCE_DIR}/LICENSE.md
         ${PROJECT_SOURCE_DIR}/include/cmdlp/parser.hpp
         ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option_list.hpp
         ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option.hpp
