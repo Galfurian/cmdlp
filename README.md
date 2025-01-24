@@ -161,4 +161,4 @@ Contributions are welcome! Feel free to open issues or submit pull requests to e
 
 ## License
 
-This is free and unencumbered software released into the public domain (see `LICENSE.md`).
+This library is licensed under the MIT License (see `LICENSE.md`).

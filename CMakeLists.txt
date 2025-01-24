@@ -59,30 +59,56 @@ target_compile_features(cmdlp INTERFACE cxx_std_11)
 # -----------------------------------------------------------------------------
 # COMPILATION FLAGS
 # -----------------------------------------------------------------------------
+
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    # Disable warnings that suggest using MSVC-specific safe functions
+    # Disable warnings for MSVC-specific "safe" functions like strcpy_s, etc.,
+    # which are not portable and may clutter warning logs.
     target_compile_definitions(cmdlp INTERFACE _CRT_SECURE_NO_WARNINGS)
+
+    # Disable warning C4702: unreachable code.
+    add_compile_options(/wd4702)
+
     if(WARNINGS_AS_ERRORS)
+        # Treat all warnings as errors to enforce stricter code quality.
         target_compile_options(cmdlp INTERFACE /WX)
     endif()
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    if(WARNINGS_AS_ERRORS)
-        target_compile_options(cmdlp INTERFACE -Werror)
-    endif()
-endif()
 
-if(STRICT_WARNINGS)
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-        # Mark system headers as external for MSVC explicitly
-        # https://devblogs.microsoft.com/cppblog/broken-warnings-theory
+    if(STRICT_WARNINGS)
+        # Enable external header management to suppress warnings in system and
+        # external headers, making it easier to focus on project-specific issues.
         target_compile_options(cmdlp INTERFACE /experimental:external)
         target_compile_options(cmdlp INTERFACE /external:I ${CMAKE_BINARY_DIR})
         target_compile_options(cmdlp INTERFACE /external:anglebrackets)
         target_compile_options(cmdlp INTERFACE /external:W0)
 
+        # Use a high warning level to catch as many potential issues as possible.
         target_compile_options(cmdlp INTERFACE /W4)
-    elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-        target_compile_options(cmdlp INTERFACE -Wall -Wextra -Wconversion -pedantic)
+
+        # Enforce standards-compliant behavior to avoid relying on MSVC-specific extensions.
+        target_compile_options(cmdlp INTERFACE /permissive-)
+    endif()
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    if(WARNINGS_AS_ERRORS)
+        # Treat all warnings as errors to enforce stricter code quality.
+        target_compile_options(cmdlp INTERFACE -Werror)
+    endif()
+
+    if(STRICT_WARNINGS)
+        # Enable a broad set of warnings to catch common and subtle issues:
+        target_compile_options(cmdlp INTERFACE
+            -Wall                # Enable most general-purpose warnings.
+            -Wextra              # Enable extra warnings not included in -Wall.
+            -Wconversion         # Warn about implicit type conversions that may lose data.
+            -pedantic            # Enforce strict compliance with the C++ standard.
+            -Wshadow             # Warn about variable shadowing, which can cause subtle bugs.
+            -Wnon-virtual-dtor   # Warn when a class with virtual functions lacks a virtual destructor.
+            -Wnull-dereference   # Warn about potential null pointer dereferences.
+            -Wformat=2           # Enable strict checks for printf/scanf format strings.
+            -Woverloaded-virtual # Warn when a derived class function hides a base class virtual function.
+            -Wfloat-equal        # Warn about direct comparisons of floating-point values, which can be imprecise.
+        )
+
     endif()
 endif()
 
