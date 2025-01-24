@@ -178,12 +178,14 @@ public:
     }
 
     /// @brief Returns a const iterator to the beginning of the list.
+    /// @return A const iterator to the beginning of the list.
     inline const_iterator_t begin() const
     {
         return options.begin();
     }
 
     /// @brief Returns a const iterator to the end of the list.
+    /// @return A const iterator to the end of the list.
     inline const_iterator_t end() const
     {
         return options.end();
