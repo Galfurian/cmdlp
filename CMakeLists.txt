@@ -179,7 +179,7 @@ if(DOXYGEN_FOUND)
 
     # Customization: Doxygen Configuration
     set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
-    set(DOXYGEN_PROJECT_NAME json)
+    set(DOXYGEN_PROJECT_NAME cmdlp)
     set(DOXYGEN_PROJECT_BRIEF "A simple command line parser for C++")
     set(DOXYGEN_PROJECT_NUMBER "${CMDLP_MAJOR_VERSION}.${CMDLP_MINOR_VERSION}.${CMDLP_MICRO_VERSION}")
     set(DOXYGEN_USE_MDFILE_AS_MAINPAGE ${PROJECT_SOURCE_DIR}/README.md)
@@ -220,4 +220,4 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating Doxygen documentation for the library"
     )
 
-    endif()
+endif()
