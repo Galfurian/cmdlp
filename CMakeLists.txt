@@ -202,22 +202,19 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_WARN_IF_DOC_ERROR YES)
     set(DOXYGEN_WARN_NO_PARAMDOC YES)
     set(DOXYGEN_WARN_AS_ERROR YES) # Treat warnings as errors for CI
-
+   
     # Exclude certain files or directories from documentation (if needed)
-    set(DOXYGEN_EXCLUDE_PATTERNS
-        "${PROJECT_SOURCE_DIR}/tests/*"
-        "${PROJECT_SOURCE_DIR}/examples/*"
-    )
+    set(DOXYGEN_EXCLUDE_PATTERNS "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/examples/*")
 
-    # Add Doxygen documentation target
+    # Add Doxygen documentation target.
+    file(GLOB_RECURSE PROJECT_HEADERS "${PROJECT_SOURCE_DIR}/include/**/*.hpp")
+    file(GLOB_RECURSE PROJECT_SOURCES "${PROJECT_SOURCE_DIR}/src/**/*.cpp")
     doxygen_add_docs(
         cmdlp_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/LICENSE.md
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/parser.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option_list.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/tokenizer.hpp
+        ${PROJECT_HEADERS}
+        ${PROJECT_SOURCES}
         COMMENT "Generating Doxygen documentation for the library"
     )
 
