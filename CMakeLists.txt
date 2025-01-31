@@ -178,7 +178,7 @@ if(DOXYGEN_FOUND)
     set(CMDLP_MICRO_VERSION ${CMAKE_MATCH_1})
 
     # Customization: Doxygen Configuration
-    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
+    set(DOXYGEN_WARN_FORMAT "$file:$line:1: $text")
     set(DOXYGEN_PROJECT_NAME cmdlp)
     set(DOXYGEN_PROJECT_BRIEF "A simple command line parser for C++")
     set(DOXYGEN_PROJECT_NUMBER "${CMDLP_MAJOR_VERSION}.${CMDLP_MINOR_VERSION}.${CMDLP_MICRO_VERSION}")
