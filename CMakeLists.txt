@@ -4,7 +4,7 @@
 # -----------------------------------------------------------------------------
 
 # Set the minimum CMake version.
-cmake_minimum_required(VERSION 2.8...3.22)
+cmake_minimum_required(VERSION 3.1...3.18)
 
 # Set the project name.
 project(cmdlp CXX)
@@ -33,10 +33,11 @@ mark_as_advanced(FORCE
 # OPTIONS
 # -----------------------------------------------------------------------------
 
-option(BUILD_TESTS "Build tests" OFF)
-option(BUILD_EXAMPLES "Build examples" ON)
 option(STRICT_WARNINGS "Enable strict compiler warnings" ON)
 option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
+
+option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_TESTS "Build tests" ON)
 
 # -----------------------------------------------------------------------------
 # DEPENDENCY (SYSTEM LIBRARIES)
@@ -44,17 +45,19 @@ option(WARNINGS_AS_ERRORS "Treat all warnings as errors" OFF)
 
 find_package(Doxygen)
 
+find_program(CLANG_TIDY_EXE NAMES clang-tidy)
+
 # -----------------------------------------------------------------------------
 # LIBRARY
 # -----------------------------------------------------------------------------
 
 # Add the C++ Library.
-add_library(cmdlp INTERFACE)
-add_library(cmdlp::cmdlp ALIAS cmdlp)
+add_library(${PROJECT_NAME} INTERFACE)
+add_library(${PROJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 # Inlcude header directories and set the library.
-target_include_directories(cmdlp INTERFACE ${PROJECT_SOURCE_DIR}/include)
+target_include_directories(${PROJECT_NAME} INTERFACE ${PROJECT_SOURCE_DIR}/include)
 # Set compiler flags.
-target_compile_features(cmdlp INTERFACE cxx_std_17)
+target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
 
 # -----------------------------------------------------------------------------
 # COMPILATION FLAGS
@@ -63,40 +66,40 @@ target_compile_features(cmdlp INTERFACE cxx_std_17)
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     # Disable warnings for MSVC-specific "safe" functions like strcpy_s, etc.,
     # which are not portable and may clutter warning logs.
-    target_compile_definitions(cmdlp INTERFACE _CRT_SECURE_NO_WARNINGS)
+    target_compile_definitions(${PROJECT_NAME} INTERFACE _CRT_SECURE_NO_WARNINGS)
 
     # Disable warning C4702: unreachable code.
     add_compile_options(/wd4702)
 
     if(WARNINGS_AS_ERRORS)
         # Treat all warnings as errors to enforce stricter code quality.
-        target_compile_options(cmdlp INTERFACE /WX)
+        target_compile_options(${PROJECT_NAME} INTERFACE /WX)
     endif()
 
     if(STRICT_WARNINGS)
         # Enable external header management to suppress warnings in system and
         # external headers, making it easier to focus on project-specific issues.
-        target_compile_options(cmdlp INTERFACE /experimental:external)
-        target_compile_options(cmdlp INTERFACE /external:I ${CMAKE_BINARY_DIR})
-        target_compile_options(cmdlp INTERFACE /external:anglebrackets)
-        target_compile_options(cmdlp INTERFACE /external:W0)
+        target_compile_options(${PROJECT_NAME} INTERFACE /experimental:external)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:I ${CMAKE_BINARY_DIR})
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:anglebrackets)
+        target_compile_options(${PROJECT_NAME} INTERFACE /external:W0)
 
         # Use a high warning level to catch as many potential issues as possible.
-        target_compile_options(cmdlp INTERFACE /W4)
+        target_compile_options(${PROJECT_NAME} INTERFACE /W4)
 
         # Enforce standards-compliant behavior to avoid relying on MSVC-specific extensions.
-        target_compile_options(cmdlp INTERFACE /permissive-)
+        target_compile_options(${PROJECT_NAME} INTERFACE /permissive-)
     endif()
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     if(WARNINGS_AS_ERRORS)
         # Treat all warnings as errors to enforce stricter code quality.
-        target_compile_options(cmdlp INTERFACE -Werror)
+        target_compile_options(${PROJECT_NAME} INTERFACE -Werror)
     endif()
 
     if(STRICT_WARNINGS)
         # Enable a broad set of warnings to catch common and subtle issues:
-        target_compile_options(cmdlp INTERFACE
+        target_compile_options(${PROJECT_NAME} INTERFACE
             -Wall                # Enable most general-purpose warnings.
             -Wextra              # Enable extra warnings not included in -Wall.
             -Wconversion         # Warn about implicit type conversions that may lose data.
@@ -118,11 +121,11 @@ endif()
 
 if(BUILD_EXAMPLES)
     # Add the example.
-    add_executable(cmdlp_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
+    add_executable(${PROJECT_NAME}_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
     # Inlcude header directories.
-    target_include_directories(cmdlp_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME}_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Liking for the test.
-    target_link_libraries(cmdlp_example cmdlp)
+    target_link_libraries(${PROJECT_NAME}_example ${PROJECT_NAME})
 endif()
 
 # -----------------------------------------------------------------------------
@@ -134,18 +137,53 @@ if(BUILD_TESTS)
     # CMake has support for adding tests to a project.
     enable_testing()
 
-    # -------------------------------------
-    # TEST
-    # -------------------------------------
     # Add the test.
-    add_executable(cmdlp_test_cmdlp ${PROJECT_SOURCE_DIR}/tests/test_cmdlp.cpp)
+    add_executable(${PROJECT_NAME}_test_${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/tests/test_${PROJECT_NAME}.cpp)
     # Inlcude header directories.
-    target_include_directories(cmdlp_test_cmdlp PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_include_directories(${PROJECT_NAME}_test_${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
     # Liking for the test.
-    target_link_libraries(cmdlp_test_cmdlp cmdlp)
+    target_link_libraries(${PROJECT_NAME}_test_${PROJECT_NAME} ${PROJECT_NAME})
     # Add the test.
-    add_test(cmdlp_test_cmdlp_run cmdlp_test_cmdlp)
+    add_test(${PROJECT_NAME}_test_${PROJECT_NAME}_run ${PROJECT_NAME}_test_${PROJECT_NAME})
 
+endif()
+
+# -----------------------------------------------------------------------------
+# CODE ANALYSIS
+# -----------------------------------------------------------------------------
+
+if(CLANG_TIDY_EXE)
+    file(GLOB_RECURSE PROJECT_HEADERS_AND_SOURCES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/**/*.c"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/*.c"
+    )
+    add_custom_target(
+        ${PROJECT_NAME}_clang_tidy
+        COMMAND ${CLANG_TIDY_EXE}
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Running clang-tidy"
+        VERBATIM
+    )
+    add_custom_target(
+        ${PROJECT_NAME}_clang_tidy_fix
+        COMMAND ${CLANG_TIDY_EXE}
+        --fix --fix-errors
+        --p=${CMAKE_BINARY_DIR}
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Running clang-tidy-fix"
+        VERBATIM
+    )
 endif()
 
 # -----------------------------------------------------------------------------
@@ -178,7 +216,7 @@ if(DOXYGEN_FOUND)
     set(CMDLP_MICRO_VERSION ${CMAKE_MATCH_1})
 
     # Customization: Doxygen Configuration
-    set(DOXYGEN_WARN_FORMAT "$file:$line: $text")
+    set(DOXYGEN_WARN_FORMAT "$file:$line:1: $text")
     set(DOXYGEN_PROJECT_NAME cmdlp)
     set(DOXYGEN_PROJECT_BRIEF "A simple command line parser for C++")
     set(DOXYGEN_PROJECT_NUMBER "${CMDLP_MAJOR_VERSION}.${CMDLP_MINOR_VERSION}.${CMDLP_MICRO_VERSION}")
@@ -202,23 +240,31 @@ if(DOXYGEN_FOUND)
     set(DOXYGEN_WARN_IF_DOC_ERROR YES)
     set(DOXYGEN_WARN_NO_PARAMDOC YES)
     set(DOXYGEN_WARN_AS_ERROR YES) # Treat warnings as errors for CI
-
+   
     # Exclude certain files or directories from documentation (if needed)
-    set(DOXYGEN_EXCLUDE_PATTERNS
-        "${PROJECT_SOURCE_DIR}/tests/*"
-        "${PROJECT_SOURCE_DIR}/examples/*"
-    )
+    set(DOXYGEN_EXCLUDE_PATTERNS "${PROJECT_SOURCE_DIR}/tests/*" "${PROJECT_SOURCE_DIR}/examples/*")
 
-    # Add Doxygen documentation target
+    # Add Doxygen documentation target.
+    file(GLOB_RECURSE PROJECT_HEADERS_AND_SOURCES
+        "${PROJECT_SOURCE_DIR}/include/**/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/**/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/**/*.h"
+        "${PROJECT_SOURCE_DIR}/include/*.hpp"
+        "${PROJECT_SOURCE_DIR}/include/*.hh"
+        "${PROJECT_SOURCE_DIR}/include/*.h"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/**/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/**/*.c"
+        "${PROJECT_SOURCE_DIR}/src/*.cpp"
+        "${PROJECT_SOURCE_DIR}/src/*.cc"
+        "${PROJECT_SOURCE_DIR}/src/*.c"
+    )
     doxygen_add_docs(
         cmdlp_documentation
         ${PROJECT_SOURCE_DIR}/README.md
         ${PROJECT_SOURCE_DIR}/LICENSE.md
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/parser.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option_list.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/option.hpp
-        ${PROJECT_SOURCE_DIR}/include/cmdlp/detail/tokenizer.hpp
-        COMMENT "Generating Doxygen documentation for the library"
+        ${PROJECT_HEADERS_AND_SOURCES}
+        COMMENT "Generating Doxygen documentation"
     )
 
 endif()

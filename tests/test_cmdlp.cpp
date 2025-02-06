@@ -31,16 +31,7 @@ test_option(const cmdlp::Parser &parser, const T1 &opt, const T2 &value)
 int main(int, char *[])
 {
     std::vector<const char *> arguments = {
-        "test_cmdlp",
-        "--double",
-        "0.00006456",
-        "--int",
-        "-42",
-        "-u",
-        "17",
-        "-s",
-        "Hello",
-        "--verbose",
+        "test_cmdlp", "--double", "0.00006456", "--int", "-42", "-u", "17", "-s", "Hello", "--verbose",
     };
 
     cmdlp::Parser parser(static_cast<int>(arguments.size()), const_cast<char **>(arguments.data()));
