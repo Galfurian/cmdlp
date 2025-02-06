@@ -4,11 +4,11 @@
 
 #pragma once
 
-#include "option.hpp"
-
 #include <exception>
 #include <sstream>
 #include <vector>
+
+#include "option.hpp"
 
 namespace cmdlp
 {
@@ -18,7 +18,8 @@ namespace detail
 
 /// @class OptionExistException
 /// @brief Exception thrown when attempting to add a duplicate option.
-class OptionExistException : public std::exception {
+class OptionExistException : public std::exception
+{
 private:
     /// @brief Message describing the conflict.
     std::string msg;
@@ -31,36 +32,34 @@ public:
         : std::exception()
     {
         std::stringstream ss;
-        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long
-           << ") already exists: (" << _existing_option->opt_short << ", " << _existing_option->opt_long << ")\n";
+        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long << ") already exists: ("
+           << _existing_option->opt_short << ", " << _existing_option->opt_long << ")\n";
         msg = ss.str();
     }
 
     /// @brief Returns the error message.
     /// @return A C-string containing the error message.
-    const char *what() const noexcept override
-    {
-        return msg.c_str();
-    }
+    const char *what() const noexcept override { return msg.c_str(); }
 };
 
 /// @class OptionList
 /// @brief Manages a list of command-line options.
-class OptionList {
+class OptionList
+{
 public:
     /// @brief Alias for a vector of `Option` pointers.
-    using option_list_t = std::vector<Option *>;
+    using option_list_t    = std::vector<Option *>;
     /// @brief Alias for an iterator over the option list.
-    using iterator_t = std::vector<Option *>::iterator;
+    using iterator_t       = std::vector<Option *>::iterator;
     /// @brief Alias for a const iterator over the option list.
     using const_iterator_t = std::vector<Option *>::const_iterator;
 
     /// @brief Constructs an empty `OptionList`.
     OptionList()
-        : options(),
-          longest_short_option(0),
-          longest_long_option(0),
-          longest_value(0)
+        : options()
+        , longest_short_option(0)
+        , longest_long_option(0)
+        , longest_value(0)
     {
     }
 
@@ -68,10 +67,10 @@ public:
     /// @param other The `OptionList` to copy.
     /// @details Creates deep copies of the options in the list.
     OptionList(const OptionList &other)
-        : options(),
-          longest_short_option(other.longest_short_option),
-          longest_long_option(other.longest_long_option),
-          longest_value(other.longest_value)
+        : options()
+        , longest_short_option(other.longest_short_option)
+        , longest_long_option(other.longest_long_option)
+        , longest_value(other.longest_value)
     {
         const MultiOption *mopt;
         const ToggleOption *topt;
@@ -179,17 +178,11 @@ public:
 
     /// @brief Returns a const iterator to the beginning of the list.
     /// @return A const iterator to the beginning of the list.
-    inline const_iterator_t begin() const
-    {
-        return options.begin();
-    }
+    inline const_iterator_t begin() const { return options.begin(); }
 
     /// @brief Returns a const iterator to the end of the list.
     /// @return A const iterator to the end of the list.
-    inline const_iterator_t end() const
-    {
-        return options.end();
-    }
+    inline const_iterator_t end() const { return options.end(); }
 
     /// @brief Retrieves the length of the longest short option name.
     /// @tparam T The type to return (default is `std::size_t`).

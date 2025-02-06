@@ -4,13 +4,13 @@
 
 #pragma once
 
-#include "detail/tokenizer.hpp"
-#include "detail/option.hpp"
-#include "detail/option_list.hpp"
-
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+
+#include "detail/option.hpp"
+#include "detail/option_list.hpp"
+#include "detail/tokenizer.hpp"
 
 #define CMDLP_MAJOR_VERSION 1 ///< Major version of the library.
 #define CMDLP_MINOR_VERSION 0 ///< Minor version of the library.
@@ -21,16 +21,17 @@ namespace cmdlp
 
 /// @class Parser
 /// @brief A class to define, parse, and manage command-line options.
-class Parser {
+class Parser
+{
 public:
     /// @brief Constructs an `Parser` object.
     /// @param argc The number of command-line arguments.
     /// @param argv The array of command-line arguments.
     /// @details Initializes the tokenizer and the option list.
     Parser(int argc, char **argv)
-        : tokenizer(argc, argv),
-          options(),
-          option_parsed(false)
+        : tokenizer(argc, argv)
+        , options()
+        , option_parsed(false)
     {
     }
 
@@ -41,11 +42,12 @@ public:
     /// @param _allowed_values The set of predefined values for the option.
     /// @param _default_value The default value for the option.
     /// @throws std::invalid_argument if the default value is not in the list of allowed values.
-    void addMultiOption(const std::string &_opt_short,
-                        const std::string &_opt_long,
-                        const std::string &_description,
-                        const std::vector<std::string> &_allowed_values,
-                        const std::string &_default_value)
+    void addMultiOption(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        const std::vector<std::string> &_allowed_values,
+        const std::string &_default_value)
     {
         // Create the MultiOption.
         auto option = new detail::MultiOption(_opt_short, _opt_long, _description, _allowed_values, _default_value);
@@ -61,11 +63,12 @@ public:
     /// @param _value The default value for the option.
     /// @param _required Indicates whether the option is required.
     template <typename T>
-    void addOption(const std::string &_opt_short,
-                   const std::string &_opt_long,
-                   const std::string &_description,
-                   const T &_value,
-                   bool _required)
+    void addOption(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        const T &_value,
+        bool _required)
     {
         // Turn the value to string.
         std::stringstream ss;
@@ -81,10 +84,11 @@ public:
     /// @param _opt_long The long version of the option (e.g., "--verbose").
     /// @param _description A description of the option, displayed in the help text.
     /// @param _toggled The default state of the toggle (true = enabled).
-    void addToggle(const std::string &_opt_short,
-                   const std::string &_opt_long,
-                   const std::string &_description,
-                   bool _toggled)
+    void addToggle(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        bool _toggled)
     {
         // Create the option.
         auto option = new detail::ToggleOption(_opt_short, _opt_long, _description, _toggled);
@@ -131,7 +135,8 @@ public:
                     // If the option is required but missing, print an error and exit.
                     if (value.empty()) {
                         if (vopt->required) {
-                            std::cerr << "Cannot find required option: " << vopt->opt_long << "[" << vopt->opt_short << "]\n";
+                            std::cerr << "Cannot find required option: " << vopt->opt_long << "[" << vopt->opt_short
+                                      << "]\n";
                             std::cerr << this->getHelp() << "\n";
                             std::exit(1);
                         } else {
@@ -176,8 +181,7 @@ public:
         for (detail::OptionList::const_iterator_t it = options.begin(); it != options.end(); ++it) {
             const detail::Separator *sep = nullptr;
             if ((sep = dynamic_cast<const detail::Separator *>(*it))) {
-                ss << "\n"
-                   << sep->description << "\n";
+                ss << "\n" << sep->description << "\n";
             } else {
                 const detail::ValueOption *vopt  = nullptr;
                 const detail::ToggleOption *topt = nullptr;

@@ -4,10 +4,10 @@
 
 #pragma once
 
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <cctype>
+#include <string>
+#include <vector>
 
 namespace cmdlp
 {
@@ -18,7 +18,8 @@ namespace detail
 /// @brief A class to tokenize and parse command-line arguments.
 /// @details This class parses command-line arguments into options and their values.
 /// Options are expected to start with '-' or '--', and values are expected to follow the respective options.
-class Tokenizer {
+class Tokenizer
+{
 private:
     /// @brief Stores the arguments as a list of strings.
     std::vector<std::string> tokens;
