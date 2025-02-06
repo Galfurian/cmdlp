@@ -267,7 +267,7 @@ public:
     /// @param _required Whether the argument is mandatory.
     PositionalOption(std::string _default_value, std::string _description, bool _required)
         : Option("", "", std::move(_description))
-        , required(std::move(_required))
+        , required(_required)
         , value(std::move(_default_value))
     {
     }
