@@ -280,19 +280,26 @@ private:
 class PositionalOption : public Option
 {
 public:
-    /// @brief Indicates whether the argument is required.
-    bool required;
     /// @brief The value provided for the positional argument.
     std::string value;
+    /// @brief Indicates whether the argument is required.
+    bool required;
 
     /// @brief Constructs a `PositionalOption` object.
+    /// @param _opt_short The short version of the option (e.g., "-m").
+    /// @param _opt_long The long version of the option (e.g., "--mode").
     /// @param _default_value The default value for the option.
     /// @param _description A description of the positional argument.
     /// @param _required Whether the argument is mandatory.
-    PositionalOption(std::string _default_value, std::string _description, bool _required)
-        : Option("", "", std::move(_description))
-        , required(_required)
+    PositionalOption(
+        std::string _opt_short,
+        std::string _opt_long,
+        std::string _default_value,
+        std::string _description,
+        bool _required)
+        : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
         , value(std::move(_default_value))
+        , required(_required)
     {
     }
 
