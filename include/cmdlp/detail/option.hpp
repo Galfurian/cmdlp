@@ -41,15 +41,21 @@ public:
     }
 
     /// @brief Copy constructor.
+    /// @param other The other entity to copy.
     Option(const Option &other) = default;
 
     /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
     auto operator=(const Option &other) -> Option & = default;
 
     /// @brief Move constructor.
+    /// @param other The other entity to move.
     Option(Option &&other) noexcept = default;
 
     /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
     auto operator=(Option &&other) noexcept -> Option & = default;
 
     /// @brief Virtual destructor.
@@ -82,15 +88,21 @@ public:
     }
 
     /// @brief Copy constructor.
+    /// @param other The other entity to copy.
     ToggleOption(const ToggleOption &other) = default;
 
     /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
     auto operator=(const ToggleOption &other) -> ToggleOption & = default;
 
     /// @brief Move constructor.
+    /// @param other The other entity to move.
     ToggleOption(ToggleOption &&other) noexcept = default;
 
     /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
     auto operator=(ToggleOption &&other) noexcept -> ToggleOption & = default;
 
     /// @brief Virtual destructor.
@@ -134,15 +146,21 @@ public:
     }
 
     /// @brief Copy constructor.
+    /// @param other The other entity to copy.
     ValueOption(const ValueOption &other) = default;
 
     /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
     auto operator=(const ValueOption &other) -> ValueOption & = default;
 
     /// @brief Move constructor.
+    /// @param other The other entity to move.
     ValueOption(ValueOption &&other) noexcept = default;
 
     /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
     auto operator=(ValueOption &&other) noexcept -> ValueOption & = default;
 
     /// @brief Virtual destructor.
@@ -187,15 +205,21 @@ public:
     }
 
     /// @brief Copy constructor.
+    /// @param other The other entity to copy.
     MultiOption(const MultiOption &other) = default;
 
     /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
     auto operator=(const MultiOption &other) -> MultiOption & = default;
 
     /// @brief Move constructor.
+    /// @param other The other entity to move.
     MultiOption(MultiOption &&other) noexcept = default;
 
     /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
     auto operator=(MultiOption &&other) noexcept -> MultiOption & = default;
 
     /// @brief Virtual destructor.
