@@ -7,7 +7,7 @@
 
 ## Overview
 
-`cmdlp` is a lightweight, easy-to-use C++ library for parsing command-line arguments. It simplifies the process of handling various types of options, including toggle switches, value-based options, and multi-value options, while providing a clean and extensible interface.
+`cmdlp` is a lightweight, easy-to-use C++ library for parsing command-line options. It simplifies the process of handling various types of options, including toggle switches, value-based options, and multi-value options, while providing a clean and extensible interface.
 
 ## Features
 
@@ -15,17 +15,14 @@
 - Toggle options (e.g., `--verbose` for enabling verbose output).
 - Value-based options (e.g., `--file input.txt`).
 - Multi-value options (e.g., `--mode auto|manual|test`).
+- Positional options (e.g. `./program --verbose a.txt b.txt`, where `a.txt` and
+  `b.txt` are the two positional options).
 - Grouping and labeling options in help messages.
 - Automatically generated help messages.
 
 ## Installation
 
-To include `cmdlp` in your project, simply add the `cmdlp` source files to your build system. For example:
-
-```bash
-mkdir cmdlp
-cp tokenizer.hpp option.hpp option_list.hpp parser.hpp cmdlp/
-```
+Include the entire `cmdlp` which you can find in `include`.
 
 Then, include the necessary headers in your project:
 
@@ -63,7 +60,7 @@ int main(int argc, char *argv[]) {
 }
 ```
 
-Running the above program with the following arguments:
+Running the above program with the following options:
 
 ```bash
 ./example --double 3.14 --int 42 --help
@@ -75,6 +72,35 @@ Produces:
 Double value: 3.14
 Integer value: 42
 Help: 1
+```
+
+## Defining and Parsing Positional Arguments
+
+Positional options are unflagged inputs identified by their position in the
+command-line input. Here is an example demonstrating how to define and parse
+positional options:
+
+```cpp
+#include <iostream>
+#include "cmdlp/parser.hpp"
+
+int main(int argc, char *argv[]) {
+    cmdlp::Parser parser(argc, argv);
+
+    // Required positional option.
+    parser.addPositionalOption("-in", "--input", "input.txt", "Input file.", true);
+    // Optional positional option.
+    parser.addPositionalOption("-out", "--output", "output.txt", "Output file.", false);
+
+    // Parse options.
+    parser.parseOptions();
+
+    // Retrieve and display positional options.
+    std::cout << " Input  (-in)  : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << " Output (-out) : " << parser.getOption<std::string>("--output") << "\n";
+
+    return 0;
+}
 ```
 
 ## Example
@@ -149,11 +175,14 @@ The class that the user is mean to rely upon:
 
 The other support classes:
 
-- **Tokenizer**: Parses raw command-line arguments.
+- **Tokenizer**: Parses raw command-line options.
 - **Option**: Base class for all options.
   - **ValueOption**: Represents options with a single value.
   - **ToggleOption**: Represents boolean flags.
   - **MultiOption**: Represents options with predefined values.
+  - **Separator**: Represents an options separator.
+  - **PositionalOption**: Represents options that are not preceded by a flag and
+    that are in a given order.
 
 ## Contributing
 

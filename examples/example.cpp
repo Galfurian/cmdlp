@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
     parser.addMultiOption("-m", "--mode", "Select the operation mode.", {"auto", "manual", "test"}, "auto");
     parser.addMultiOption("-id", "--index", "Select the index.", {"0", "1"}, "1");
 
-    // Add positional arguments.
-    parser.addPositionalOption("input_file.txt", "Input file.", true);    // Required positional argument.
-    parser.addPositionalOption("output_file.txt", "Output file.", false); // Optional positional argument.
+    parser.addSeparator("Positional options:");
+    parser.addPositionalOption("-in", "--input", "input.txt", "Input file.", true);
+    parser.addPositionalOption("-out", "--output", "output.txt", "Output file.", false);
 
     // Parse options.
     parser.parseOptions();
@@ -44,6 +44,9 @@ int main(int argc, char *argv[])
 
     std::cout << "    Mode      (-m)  : " << parser.getOption<std::string>("--mode") << "\n";
     std::cout << "    Index     (-id) : " << parser.getOption<std::string>("--index") << "\n";
+
+    std::cout << "    Input      (-in)  : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << "    Output     (-out) : " << parser.getOption<std::string>("--output") << "\n";
 
     return 0;
 }

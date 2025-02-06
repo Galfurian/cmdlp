@@ -68,15 +68,14 @@ public:
     {
         if (this != &other) {
             for (const auto &option : other.options) {
-                auto vopt = std::dynamic_pointer_cast<ValueOption>(option);
-                auto topt = std::dynamic_pointer_cast<ToggleOption>(option);
-                auto mopt = std::dynamic_pointer_cast<MultiOption>(option);
-                if (vopt) {
+                if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
                     options.emplace_back(std::make_shared<ValueOption>(*vopt));
-                } else if (topt) {
+                } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
                     options.emplace_back(std::make_shared<ToggleOption>(*topt));
-                } else if (mopt) {
+                } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
                     options.emplace_back(std::make_shared<MultiOption>(*mopt));
+                } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
+                    options.emplace_back(std::make_shared<PositionalOption>(*popt));
                 }
             }
         }
@@ -106,15 +105,14 @@ public:
             longest_value        = other.longest_value;
             options.clear();
             for (const auto &option : other.options) {
-                auto vopt = std::dynamic_pointer_cast<ValueOption>(option);
-                auto topt = std::dynamic_pointer_cast<ToggleOption>(option);
-                auto mopt = std::dynamic_pointer_cast<MultiOption>(option);
-                if (vopt) {
+                if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
                     options.emplace_back(std::make_shared<ValueOption>(*vopt));
-                } else if (topt) {
+                } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
                     options.emplace_back(std::make_shared<ToggleOption>(*topt));
-                } else if (mopt) {
+                } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
                     options.emplace_back(std::make_shared<MultiOption>(*mopt));
+                } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
+                    options.emplace_back(std::make_shared<PositionalOption>(*popt));
                 }
             }
         }
@@ -172,16 +170,15 @@ public:
     {
         const std::shared_ptr<Option> option = this->findOption(option_string);
         if (option) {
-            auto vopt = std::dynamic_pointer_cast<ValueOption>(option);
-            auto topt = std::dynamic_pointer_cast<ToggleOption>(option);
-            auto mopt = std::dynamic_pointer_cast<MultiOption>(option);
             std::stringstream ss;
-            if (vopt) {
+            if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
                 ss << vopt->value;
-            } else if (topt) {
+            } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
                 ss << topt->toggled;
-            } else if (mopt) {
+            } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
                 ss << mopt->selected_value;
+            } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
+                ss << popt->value;
             }
             T data;
             ss >> data;
@@ -197,11 +194,6 @@ public:
     {
         // If the option is a separator, skip all checks.
         if (std::dynamic_pointer_cast<Separator>(option)) {
-            options.push_back(option);
-            return;
-        }
-        // If the option is a separator, skip all checks.
-        if (std::dynamic_pointer_cast<PositionalOption>(option)) {
             options.push_back(option);
             return;
         }
@@ -280,17 +272,17 @@ auto OptionList::getOption(const std::string &option_string) const -> std::strin
 {
     const std::shared_ptr<Option> option = this->findOption(option_string);
     if (option != nullptr) {
-        auto vopt = std::dynamic_pointer_cast<ValueOption>(option);
-        if (vopt != nullptr) {
+        if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
             return vopt->value;
         }
-        auto topt = std::dynamic_pointer_cast<ToggleOption>(option);
-        if (topt != nullptr) {
+        if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
             return topt->toggled ? "true" : "false";
         }
-        auto mopt = std::dynamic_pointer_cast<MultiOption>(option);
-        if (mopt != nullptr) {
+        if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
             return mopt->selected_value;
+        }
+        if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
+            return popt->value;
         }
     }
     return "";

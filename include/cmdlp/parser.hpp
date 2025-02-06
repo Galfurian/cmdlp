@@ -14,7 +14,7 @@
 
 enum : unsigned char {
     CMDLP_MAJOR_VERSION = 1, ///< Major version of the library.
-    CMDLP_MINOR_VERSION = 1, ///< Minor version of the library.
+    CMDLP_MINOR_VERSION = 2, ///< Minor version of the library.
     CMDLP_MICRO_VERSION = 0  ///< Micro version of the library.
 };
 
@@ -94,12 +94,20 @@ public:
     }
 
     /// @brief Adds a positional option to the parser.
+    /// @param _opt_short The short version of the option (e.g., "-f").
+    /// @param _opt_long The long version of the option (e.g., "--file").
     /// @param _default_value The default value for the option.
     /// @param _description A description of the option.
     /// @param _required Whether the option is required.
-    void addPositionalOption(const std::string &_default_value, const std::string &_description, bool _required)
+    void addPositionalOption(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_default_value,
+        const std::string &_description,
+        bool _required)
     {
-        options.addOption(std::make_shared<detail::PositionalOption>(_default_value, _description, _required));
+        options.addOption(
+            std::make_shared<detail::PositionalOption>(_opt_short, _opt_long, _default_value, _description, _required));
     }
 
     /// @brief Adds a separator for grouping options in the help message.
@@ -167,15 +175,14 @@ public:
                 ss << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
                 ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
                 if (vopt) {
-                    ss << vopt->value;
+                    ss << vopt->value << ") " << (vopt->required ? "R" : " ") << " : ";
                 } else if (topt) {
-                    ss << (topt->toggled ? "true" : "false");
+                    ss << (topt->toggled ? "true" : "false") << ")   : ";
                 } else if (mopt) {
-                    ss << mopt->selected_value;
+                    ss << mopt->selected_value << ")   : ";
                 } else if (popt) {
-                    ss << popt->value;
+                    ss << popt->value << ") " << (popt->required ? "R" : " ") << " : ";
                 }
-                ss << ") : ";
                 ss << option->description;
                 if (mopt != nullptr) {
                     ss << " " << mopt->print_list();
