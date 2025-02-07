@@ -1,5 +1,5 @@
 title: CMDLP
-description: A c++ command-line parsing library
+description: A lightweight, easy-to-use C++ library for parsing command-line options.
 author: Enrico Fraccaroli
 show_downloads: false
 google_analytics:
