@@ -4,28 +4,28 @@
 
 // Floating-point comparison
 template <typename T1, typename T2>
-typename std::enable_if<std::is_floating_point<T1>::value || std::is_floating_point<T2>::value, int>::type
+typename std::enable_if<std::is_floating_point<T1>::value || std::is_floating_point<T2>::value, bool>::type
 test_option(const cmdlp::Parser &parser, const T1 &opt, const T2 &value)
 {
     if (std::abs(opt - value) > 1e-09) {
         std::cerr << "The option `" << opt << "` is different than `" << value << "`\n";
         std::cerr << parser.getHelp() << "\n";
-        return 1;
+        return false;
     }
-    return 0; // Test passed
+    return true;
 }
 
 // General comparison for other types
 template <typename T1, typename T2>
-typename std::enable_if<!std::is_floating_point<T1>::value && !std::is_floating_point<T2>::value, int>::type
+typename std::enable_if<!std::is_floating_point<T1>::value && !std::is_floating_point<T2>::value, bool>::type
 test_option(const cmdlp::Parser &parser, const T1 &opt, const T2 &value)
 {
     if (opt != value) {
         std::cerr << "The option `" << opt << "` is different than `" << value << "`\n";
         std::cerr << parser.getHelp() << "\n";
-        return 1;
+        return false;
     }
-    return 0; // Test passed
+    return true;
 }
 
 int main(int, char *[])
@@ -43,15 +43,15 @@ int main(int, char *[])
     parser.addToggle("-v", "--verbose", "Enables verbose output", false);
     parser.parseOptions();
 
-    if (test_option(parser, parser.getOption<double>("-d"), 0.00006456))
+    if (!test_option(parser, parser.getOption<double>("-d"), 0.00006456))
         return 1;
-    if (test_option(parser, parser.getOption<int>("-i"), -42))
+    if (!test_option(parser, parser.getOption<int>("-i"), -42))
         return 1;
-    if (test_option(parser, parser.getOption<int>("-u"), 17))
+    if (!test_option(parser, parser.getOption<int>("-u"), 17))
         return 1;
-    if (test_option(parser, parser.getOption<std::string>("-s"), "Hello"))
+    if (!test_option(parser, parser.getOption<std::string>("-s"), "Hello"))
         return 1;
-    if (test_option(parser, parser.getOption<bool>("-v"), true))
+    if (!test_option(parser, parser.getOption<bool>("-v"), true))
         return 1;
 
     return 0;

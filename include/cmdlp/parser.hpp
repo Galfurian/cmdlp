@@ -205,13 +205,62 @@ public:
         option_parsed = true;
     }
 
+    /// @brief Generates a concise usage string for the command.
+    /// @return A formatted usage string.
+    auto getUsage() const -> std::string
+    {
+        std::stringstream usage;
+        usage << "Usage: command";
+
+        bool has_optional_options = false;
+        std::vector<std::string> positional_args;
+
+        for (const auto &option : options) {
+            // Handle required ValueOption and MultiOption
+            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
+                if (vopt->required) {
+                    usage << " " << vopt->opt_long << " VALUE";
+                } else {
+                    has_optional_options = true;
+                }
+            } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
+                usage << " " << mopt->opt_long << " {" << mopt->print_list() << "}";
+            }
+            // Mark if any optional ToggleOption exists
+            else if (std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
+                has_optional_options = true;
+            }
+            // Collect positional arguments
+            else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
+                std::string clean_name = posopt->opt_long.substr(2); // Remove '--' prefix
+                positional_args.push_back("<" + clean_name + ">");
+            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
+                std::string clean_name = poslist->opt_long.substr(2); // Remove '--' prefix
+                positional_args.push_back("<" + clean_name + "...>");
+            }
+        }
+
+        // Add generic placeholder for optional options
+        if (has_optional_options) {
+            usage << " [OPTIONS...]";
+        }
+
+        // Append positional arguments
+        for (const auto &pos_arg : positional_args) {
+            usage << " " << pos_arg;
+        }
+
+        return usage.str();
+    }
+
     /// @brief Generates a help string for all registered options.
+    /// @details Lists all options with their short and long names, default
+    /// values, and descriptions.
     /// @return A string containing the help text for all options.
-    /// @details Lists all options with their short and long names, default values, and descriptions.
     auto getHelp() const -> std::string
     {
         std::stringstream ss;
-        ss << this->generateUsage() << "\n";
+        ss << this->getUsage() << "\n";
         for (const auto &option : options) {
             auto sepr = std::dynamic_pointer_cast<detail::Separator>(option);
             if (sepr) {
@@ -234,14 +283,7 @@ public:
                 } else if (popt) {
                     ss << popt->value << ") " << (popt->required ? "R" : " ") << " : ";
                 } else if (plopt) {
-                    if (plopt->values.empty()) {
-                        ss << "None";
-                    } else {
-                        for (const auto &val : plopt->values) {
-                            ss << val << " ";
-                        }
-                    }
-                    ss << ") " << (plopt->required ? "R" : " ") << " : ";
+                    ss << plopt->print_values() << ") " << (plopt->required ? "R" : " ") << " : ";
                 }
                 ss << option->description;
                 if (mopt != nullptr) {
@@ -313,6 +355,7 @@ private:
     {
         if (pos_arg_index < total_positional_args) {
             posopt->value = tokenizer.getPositionalArgument(pos_arg_index++);
+            options.updateLongestValue(posopt->value.length());
         } else if (posopt->required) {
             std::cerr << "Missing required positional argument: " << posopt->description << "\n";
             std::cerr << this->getHelp() << "\n";
@@ -332,59 +375,12 @@ private:
         while (pos_arg_index < total_positional_args) {
             poslist->values.push_back(tokenizer.getPositionalArgument(pos_arg_index++));
         }
+        options.updateLongestValue(poslist->print_values().length());
         if (poslist->required && poslist->values.empty()) {
             std::cerr << "Missing required positional list of arguments for: `" << poslist->description << "`\n";
             std::cerr << this->getHelp() << "\n";
             std::exit(1);
         }
-    }
-
-    /// @brief Generates a concise usage string for the command.
-    /// @return A formatted usage string.
-    std::string generateUsage() const
-    {
-        std::stringstream usage;
-        usage << "Usage: command";
-
-        bool has_optional_options = false;
-        std::vector<std::string> positional_args;
-
-        for (const auto &option : options) {
-            // Handle required ValueOption and MultiOption
-            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
-                if (vopt->required) {
-                    usage << " " << vopt->opt_long << " VALUE";
-                } else {
-                    has_optional_options = true;
-                }
-            } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
-                usage << " " << mopt->opt_long << " {" << mopt->print_list() << "}";
-            }
-            // Mark if any optional ToggleOption exists
-            else if (std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
-                has_optional_options = true;
-            }
-            // Collect positional arguments
-            else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                std::string clean_name = posopt->opt_long.substr(2); // Remove '--' prefix
-                positional_args.push_back("<" + clean_name + ">");
-            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
-                std::string clean_name = poslist->opt_long.substr(2); // Remove '--' prefix
-                positional_args.push_back("<" + clean_name + "...>");
-            }
-        }
-
-        // Add generic placeholder for optional options
-        if (has_optional_options) {
-            usage << " [OPTIONS...]";
-        }
-
-        // Append positional arguments
-        for (const auto &pos_arg : positional_args) {
-            usage << " " << pos_arg;
-        }
-
-        return usage.str();
     }
 
     /// @brief Tokenizer for parsing command-line arguments.

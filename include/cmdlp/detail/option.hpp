@@ -32,15 +32,20 @@ public:
     std::string description;
 
     /// @brief Constructs an `Option` object.
-    /// @param _opt_short The short version of the option.
-    /// @param _opt_long The long version of the option.
+    /// @param _opt_short The short version of the option (should start with '-').
+    /// @param _opt_long The long version of the option (should start with '--').
     /// @param _description The description of the option.
     Option(std::string _opt_short, std::string _opt_long, std::string _description)
         : opt_short(std::move(_opt_short))
         , opt_long(std::move(_opt_long))
         , description(std::move(_description))
     {
-        // Constructor logic (currently empty).
+        if (!opt_short.empty() && opt_short[0] != '-') {
+            throw std::invalid_argument("Short option '" + opt_short + "' must start with '-'");
+        }
+        if (!opt_long.empty() && (opt_long.size() < 2 || opt_long.substr(0, 2) != "--")) {
+            throw std::invalid_argument("Long option '" + opt_long + "' must start with '--'");
+        }
     }
 
     /// @brief Copy constructor.
@@ -142,7 +147,7 @@ public:
         : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
         , toggled(_toggled)
     {
-        // Constructor logic (currently empty).
+        // Nothing to do.
     }
 
     /// @brief Copy constructor.
@@ -302,7 +307,29 @@ public:
         , required(_required)
         , value(std::move(_value))
     {
+        // Nothing to do.
     }
+
+    /// @brief Copy constructor.
+    /// @param other The other entity to copy.
+    PositionalOption(const PositionalOption &other) = default;
+
+    /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
+    auto operator=(const PositionalOption &other) -> PositionalOption & = default;
+
+    /// @brief Move constructor.
+    /// @param other The other entity to move.
+    PositionalOption(PositionalOption &&other) noexcept = default;
+
+    /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
+    auto operator=(PositionalOption &&other) noexcept -> PositionalOption & = default;
+
+    /// @brief Virtual destructor.
+    ~PositionalOption() override = default;
 
     /// @brief Retrieves the length of the positional argument's value.
     /// @return The length of the value as a `std::size_t`.
@@ -329,7 +356,29 @@ public:
         , required(_required)
         , values()
     {
+        // Nothing to do.
     }
+
+    /// @brief Copy constructor.
+    /// @param other The other entity to copy.
+    PositionalList(const PositionalList &other) = default;
+
+    /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
+    auto operator=(const PositionalList &other) -> PositionalList & = default;
+
+    /// @brief Move constructor.
+    /// @param other The other entity to move.
+    PositionalList(PositionalList &&other) noexcept = default;
+
+    /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
+    auto operator=(PositionalList &&other) noexcept -> PositionalList & = default;
+
+    /// @brief Virtual destructor.
+    ~PositionalList() override = default;
 
     /// @brief Retrieves the length of the positional argument's value.
     /// @return The length of the value as a `std::size_t`.
@@ -340,6 +389,20 @@ public:
             max_length = std::max(max_length, value.size());
         }
         return max_length;
+    }
+
+    /// @brief Prints the list of values.
+    /// @return A formatted string containing all the values.
+    auto print_values() const -> std::string
+    {
+        std::ostringstream oss;
+        for (size_t i = 0; i < values.size(); ++i) {
+            oss << values[i];
+            if (i < values.size() - 1) {
+                oss << ", ";
+            }
+        }
+        return oss.str();
     }
 };
 
@@ -353,7 +416,29 @@ public:
     explicit Separator(std::string _description)
         : Option("", "", std::move(_description))
     {
+        // Nothing to do.
     }
+
+    /// @brief Copy constructor.
+    /// @param other The other entity to copy.
+    Separator(const Separator &other) = default;
+
+    /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
+    auto operator=(const Separator &other) -> Separator & = default;
+
+    /// @brief Move constructor.
+    /// @param other The other entity to move.
+    Separator(Separator &&other) noexcept = default;
+
+    /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
+    auto operator=(Separator &&other) noexcept -> Separator & = default;
+
+    /// @brief Virtual destructor.
+    ~Separator() override = default;
 
     /// @brief Retrieves the length of the value associated with the separator.
     /// @return Always returns 0 as separators do not have values.
