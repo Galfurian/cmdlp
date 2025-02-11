@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     parser.addToggle("-v", "--verbose", "Enables verbose output", false);
 
     parser.addSeparator("Multi options:");
-    parser.addMultiOption("-m", "--mode", "Select the operation mode.", {"auto", "manual", "test"}, "auto");
+    parser.addMultiOption("-m", "--mode", "Select the operation mode.", {"auto", "manual", "test", "debugging"}, "auto");
     parser.addMultiOption("-id", "--index", "Select the index.", {"0", "1"}, "1");
 
     parser.addSeparator("Positional options:");

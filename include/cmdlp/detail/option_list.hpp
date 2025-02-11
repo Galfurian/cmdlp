@@ -180,7 +180,7 @@ public:
             } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
                 ss << topt->toggled;
             } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
-                ss << mopt->selected_value;
+                ss << mopt->value;
             } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
                 ss << popt->value;
             }
@@ -307,7 +307,7 @@ auto OptionList::getOption(const std::string &option_string) const -> std::strin
             return topt->toggled ? "true" : "false";
         }
         if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
-            return mopt->selected_value;
+            return mopt->value;
         }
         if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
             return popt->value;

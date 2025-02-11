@@ -187,7 +187,7 @@ public:
     /// @brief The set of allowed values for this option.
     Values allowed_values;
     /// @brief The selected value for this option.
-    std::string selected_value;
+    std::string value;
 
     /// @brief Constructs a `MultiOption` object.
     /// @param _opt_short The short version of the option (e.g., "-m").
@@ -203,11 +203,11 @@ public:
         std::string _value)
         : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
         , allowed_values(std::move(_allowed_values))
-        , selected_value(std::move(_value))
+        , value(std::move(_value))
     {
-        if (!this->isValueAllowed(selected_value)) {
+        if (!this->isValueAllowed(value)) {
             std::ostringstream oss;
-            oss << "Value \"" << selected_value << "\" is not in the list of allowed values: " << print_list();
+            oss << "Value \"" << value << "\" is not in the list of allowed values: " << print_list();
             throw std::invalid_argument(oss.str());
         }
     }
@@ -234,16 +234,16 @@ public:
     ~MultiOption() override = default;
 
     /// @brief Sets the selected value for this option.
-    /// @param value The value to set.
+    /// @param _value The value to set.
     /// @throws std::invalid_argument if the value is not in the list of allowed values.
-    void setValue(const std::string &value)
+    void setValue(const std::string &_value)
     {
         if (!this->isValueAllowed(value)) {
             std::ostringstream oss;
-            oss << "Value \"" << value << "\" is not in the list of allowed values: " << print_list();
+            oss << "Value \"" << _value << "\" is not in the list of allowed values: " << print_list();
             throw std::invalid_argument(oss.str());
         }
-        selected_value = value;
+        value = _value;
     }
 
     /// @brief Retrieves the length of the selected value.
@@ -251,8 +251,8 @@ public:
     auto get_value_length() const -> std::size_t override
     {
         std::size_t max_length = 0;
-        for (const auto &value : allowed_values) {
-            max_length = std::max(value.size(), max_length);
+        for (const auto &entry : allowed_values) {
+            max_length = std::max(entry.size(), max_length);
         }
         return max_length;
     }
@@ -275,9 +275,9 @@ private:
     /// @brief Checks if a value is allowed.
     /// @param value The value to check.
     /// @return True if the value is in the allowed values, false otherwise.
-    auto isValueAllowed(const std::string &value) const -> bool
+    auto isValueAllowed(const std::string &_value) const -> bool
     {
-        return std::find(allowed_values.begin(), allowed_values.end(), value) != allowed_values.end();
+        return std::find(allowed_values.begin(), allowed_values.end(), _value) != allowed_values.end();
     }
 };
 

@@ -212,44 +212,32 @@ public:
         std::stringstream usage;
         usage << "Usage: command";
 
-        bool has_optional_options = false;
         std::vector<std::string> positional_args;
 
+        std::stringstream ss;
         for (const auto &option : options) {
-            // Handle required ValueOption and MultiOption
             if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
-                if (vopt->required) {
-                    usage << " " << vopt->opt_long << " VALUE";
-                } else {
-                    has_optional_options = true;
+                ss << ' ' << (vopt->required ? '\0' : '[');
+                ss << vopt->opt_long;
+                if (!vopt->value.empty()) {
+                    ss << "=<" << vopt->value << ">";
                 }
+                ss << (vopt->required ? '\0' : ']');
             } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
-                usage << " " << mopt->opt_long << " {" << mopt->print_list() << "}";
-            }
-            // Mark if any optional ToggleOption exists
-            else if (std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
-                has_optional_options = true;
-            }
-            // Collect positional arguments
-            else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                std::string clean_name = posopt->opt_long.substr(2); // Remove '--' prefix
-                positional_args.push_back("<" + clean_name + ">");
+                ss << " [" << mopt->opt_long << "={" << mopt->print_list() << "}]";
+            } else if (auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
+                ss << " [" << topt->opt_long << "]";
+            } else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
+                positional_args.push_back("<" + posopt->opt_long.substr(2) + ">");
             } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
-                std::string clean_name = poslist->opt_long.substr(2); // Remove '--' prefix
-                positional_args.push_back("<" + clean_name + "...>");
+                positional_args.push_back("<" + poslist->opt_long.substr(2) + "...>");
             }
         }
-
-        // Add generic placeholder for optional options
-        if (has_optional_options) {
-            usage << " [OPTIONS...]";
-        }
-
-        // Append positional arguments
+        // Append positional arguments at the end.
         for (const auto &pos_arg : positional_args) {
-            usage << " " << pos_arg;
+            ss << ' ' << pos_arg;
         }
-
+        usage << this->format_paragraph(ss.str(), usage.str().length() + 1, usage.str().length() + 1, 80);
         return usage.str();
     }
 
@@ -266,30 +254,38 @@ public:
             if (sepr) {
                 ss << "\n" << sepr->description << "\n";
             } else {
-                auto vopt  = std::dynamic_pointer_cast<detail::ValueOption>(option);
-                auto topt  = std::dynamic_pointer_cast<detail::ToggleOption>(option);
-                auto mopt  = std::dynamic_pointer_cast<detail::MultiOption>(option);
-                auto popt  = std::dynamic_pointer_cast<detail::PositionalOption>(option);
-                auto plopt = std::dynamic_pointer_cast<detail::PositionalList>(option);
-                ss << "[" << std::setw(options.getLongestShortOption<int>()) << std::left << option->opt_short << "] ";
-                ss << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
-                ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
+                auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option);
+                auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option);
+                auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option);
+                auto popt = std::dynamic_pointer_cast<detail::PositionalOption>(option);
+                auto lopt = std::dynamic_pointer_cast<detail::PositionalList>(option);
+
+                std::stringstream ssopt;
+                ssopt << " " << std::setw(options.getLongestShortOption<int>()) << std::left << option->opt_short;
+                ssopt << " " << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
+                ssopt << " " << std::setw(options.getLongestValue<int>()) << std::left;
                 if (vopt) {
-                    ss << vopt->value << ") " << (vopt->required ? "R" : " ") << " : ";
+                    ssopt << (vopt->required ? "<req>" : vopt->value);
                 } else if (topt) {
-                    ss << (topt->toggled ? "true" : "false") << ")   : ";
+                    ssopt << (topt->toggled ? "true" : "false");
                 } else if (mopt) {
-                    ss << mopt->selected_value << ")   : ";
+                    ssopt << mopt->value;
                 } else if (popt) {
-                    ss << popt->value << ") " << (popt->required ? "R" : " ") << " : ";
-                } else if (plopt) {
-                    ss << plopt->print_values() << ") " << (plopt->required ? "R" : " ") << " : ";
+                    ssopt << (popt->required ? "<req>" : popt->value);
+                } else if (lopt) {
+                    ssopt << (lopt->required ? "<req>" : lopt->print_values());
                 }
-                ss << option->description;
+                ssopt << " : ";
                 if (mopt != nullptr) {
-                    ss << " [" << mopt->print_list() << "]";
+                    ssopt << this->format_paragraph(
+                        option->description + " [" + mopt->print_list() + "]", ssopt.str().length(),
+                        ssopt.str().length(), 80);
+                } else {
+                    ssopt << this->format_paragraph(
+                        option->description, ssopt.str().length(), ssopt.str().length(), 80);
                 }
-                ss << "\n";
+                ssopt << "\n";
+                ss << ssopt.str();
             }
         }
         return ss.str();
@@ -331,7 +327,7 @@ private:
             }
         }
         mopt->setValue(value);
-        options.updateLongestValue(mopt->selected_value.length());
+        options.updateLongestValue(mopt->value.length());
         return true;
     }
 
@@ -381,6 +377,45 @@ private:
             std::cerr << this->getHelp() << "\n";
             std::exit(1);
         }
+    }
+
+    /// @brief Formats a paragraph to fit within a specified line width, applying indentation.
+    /// @param text The paragraph to be formatted.
+    /// @param initial_offset The character length already printed on the first line.
+    /// @param tabulation The indentation applied to all subsequent lines.
+    /// @param max_line_length The maximum length of each line.
+    /// @return A formatted string with proper line breaks and indentation.
+    std::string format_paragraph(
+        const std::string &text,
+        std::size_t initial_offset,
+        std::size_t tabulation,
+        std::size_t max_line_length) const
+    {
+        std::ostringstream formatted;
+        std::size_t current_length = initial_offset;
+        std::string indent(tabulation, ' ');
+        auto it = text.begin();
+        while (it != text.end()) {
+            auto word_start = it;
+            // Find the end of the current word.
+            auto word_end   = std::find(it, text.end(), ' ');
+            std::string word(word_start, word_end);
+            // Check if adding the word would exceed the max line length.
+            if (current_length + word.length() + 1 > max_line_length) {
+                formatted << "\n" << indent;
+                current_length = tabulation;
+            } else if (it != text.begin()) {
+                formatted << ' ';
+                ++current_length;
+            }
+            // Append the word.
+            formatted << word;
+            current_length += word.length();
+            // Move iterator to next word.
+            it = (word_end == text.end()) ? word_end : std::next(word_end);
+        }
+
+        return formatted.str();
     }
 
     /// @brief Tokenizer for parsing command-line arguments.
