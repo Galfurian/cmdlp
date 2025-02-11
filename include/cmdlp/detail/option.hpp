@@ -13,6 +13,9 @@
 namespace cmdlp
 {
 
+/// @brief A list of multiple values.
+using Values = std::vector<std::string>;
+
 namespace detail
 {
 
@@ -67,6 +70,61 @@ public:
     virtual auto get_value_length() const -> std::size_t = 0;
 };
 
+/// @class ValueOption
+/// @brief A command-line option that requires an associated value.
+class ValueOption : public Option
+{
+public:
+    /// @brief Indicates whether the option is required.
+    bool required;
+    /// @brief The value associated with the option.
+    std::string value;
+
+    /// @brief Constructs a `ValueOption` object.
+    /// @param _opt_short The short version of the option (e.g., "-f").
+    /// @param _opt_long The long version of the option (e.g., "--file").
+    /// @param _description The description of the option.
+    /// @param _required Indicates whether the option is mandatory (true = required).
+    /// @param _value The default value for the option.
+    ValueOption(
+        std::string _opt_short,
+        std::string _opt_long,
+        std::string _description,
+        bool _required,
+        std::string _value)
+        : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
+        , required(_required)
+        , value(std::move(_value))
+    {
+        // Constructor logic (currently empty).
+    }
+
+    /// @brief Copy constructor.
+    /// @param other The other entity to copy.
+    ValueOption(const ValueOption &other) = default;
+
+    /// @brief Copy assignment operator.
+    /// @param other The other entity to copy.
+    /// @return A reference to this object.
+    auto operator=(const ValueOption &other) -> ValueOption & = default;
+
+    /// @brief Move constructor.
+    /// @param other The other entity to move.
+    ValueOption(ValueOption &&other) noexcept = default;
+
+    /// @brief Move assignment operator.
+    /// @param other The other entity to move.
+    /// @return A reference to this object.
+    auto operator=(ValueOption &&other) noexcept -> ValueOption & = default;
+
+    /// @brief Virtual destructor.
+    ~ValueOption() override = default;
+
+    /// @brief Retrieves the length of the value associated with the option.
+    /// @return The length of the value as a `std::size_t`.
+    auto get_value_length() const -> std::size_t override { return value.size(); }
+};
+
 /// @class ToggleOption
 /// @brief A command-line option that represents a toggle or flag.
 class ToggleOption : public Option
@@ -116,68 +174,13 @@ public:
     }
 };
 
-/// @class ValueOption
-/// @brief A command-line option that requires an associated value.
-class ValueOption : public Option
-{
-public:
-    /// @brief The value associated with the option.
-    std::string value;
-    /// @brief Indicates whether the option is required.
-    bool required;
-
-    /// @brief Constructs a `ValueOption` object.
-    /// @param _opt_short The short version of the option (e.g., "-f").
-    /// @param _opt_long The long version of the option (e.g., "--file").
-    /// @param _description The description of the option.
-    /// @param _value The default value for the option.
-    /// @param _required Indicates whether the option is mandatory (true = required).
-    ValueOption(
-        std::string _opt_short,
-        std::string _opt_long,
-        std::string _description,
-        std::string _value,
-        bool _required)
-        : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
-        , value(std::move(_value))
-        , required(_required)
-    {
-        // Constructor logic (currently empty).
-    }
-
-    /// @brief Copy constructor.
-    /// @param other The other entity to copy.
-    ValueOption(const ValueOption &other) = default;
-
-    /// @brief Copy assignment operator.
-    /// @param other The other entity to copy.
-    /// @return A reference to this object.
-    auto operator=(const ValueOption &other) -> ValueOption & = default;
-
-    /// @brief Move constructor.
-    /// @param other The other entity to move.
-    ValueOption(ValueOption &&other) noexcept = default;
-
-    /// @brief Move assignment operator.
-    /// @param other The other entity to move.
-    /// @return A reference to this object.
-    auto operator=(ValueOption &&other) noexcept -> ValueOption & = default;
-
-    /// @brief Virtual destructor.
-    ~ValueOption() override = default;
-
-    /// @brief Retrieves the length of the value associated with the option.
-    /// @return The length of the value as a `std::size_t`.
-    auto get_value_length() const -> std::size_t override { return value.size(); }
-};
-
 /// @class MultiOption
 /// @brief A command-line option that allows selecting from a predefined set of values.
 class MultiOption : public Option
 {
 public:
     /// @brief The set of allowed values for this option.
-    std::vector<std::string> allowed_values;
+    Values allowed_values;
     /// @brief The selected value for this option.
     std::string selected_value;
 
@@ -186,16 +189,16 @@ public:
     /// @param _opt_long The long version of the option (e.g., "--mode").
     /// @param _description The description of the option.
     /// @param _allowed_values The set of allowed values for the option.
-    /// @param _default_value The default value for the option.
+    /// @param _value The default value for the option.
     MultiOption(
         std::string _opt_short,
         std::string _opt_long,
         std::string _description,
-        std::vector<std::string> _allowed_values,
-        std::string _default_value)
+        Values _allowed_values,
+        std::string _value)
         : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
         , allowed_values(std::move(_allowed_values))
-        , selected_value(std::move(_default_value))
+        , selected_value(std::move(_value))
     {
         if (!this->isValueAllowed(selected_value)) {
             std::ostringstream oss;
@@ -254,14 +257,12 @@ public:
     auto print_list() const -> std::string
     {
         std::ostringstream oss;
-        oss << "[";
         for (size_t i = 0; i < allowed_values.size(); ++i) {
             oss << allowed_values[i];
             if (i < allowed_values.size() - 1) {
                 oss << ", ";
             }
         }
-        oss << "]";
         return oss.str();
     }
 
@@ -280,32 +281,66 @@ private:
 class PositionalOption : public Option
 {
 public:
-    /// @brief The value provided for the positional argument.
-    std::string value;
     /// @brief Indicates whether the argument is required.
     bool required;
+    /// @brief The value provided for the positional argument.
+    std::string value;
 
     /// @brief Constructs a `PositionalOption` object.
     /// @param _opt_short The short version of the option (e.g., "-m").
     /// @param _opt_long The long version of the option (e.g., "--mode").
-    /// @param _default_value The default value for the option.
     /// @param _description A description of the positional argument.
     /// @param _required Whether the argument is mandatory.
+    /// @param _value The default value for the option.
     PositionalOption(
         std::string _opt_short,
         std::string _opt_long,
-        std::string _default_value,
         std::string _description,
-        bool _required)
+        bool _required,
+        std::string _value)
         : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
-        , value(std::move(_default_value))
         , required(_required)
+        , value(std::move(_value))
     {
     }
 
     /// @brief Retrieves the length of the positional argument's value.
     /// @return The length of the value as a `std::size_t`.
     auto get_value_length() const -> std::size_t override { return value.size(); }
+};
+
+/// @class PositionalList
+/// @brief Represents a list of positional arguments in the command-line input.
+class PositionalList : public Option
+{
+public:
+    /// @brief Indicates whether the argument is required.
+    bool required;
+    /// @brief The values.
+    Values values;
+
+    /// @brief Constructs a `PositionalOption` object.
+    /// @param _opt_short The short version of the option (e.g., "-m").
+    /// @param _opt_long The long version of the option (e.g., "--mode").
+    /// @param _description A description of the positional argument.
+    /// @param _required Whether the argument is mandatory.
+    PositionalList(std::string _opt_short, std::string _opt_long, std::string _description, bool _required)
+        : Option(std::move(_opt_short), std::move(_opt_long), std::move(_description))
+        , required(_required)
+        , values()
+    {
+    }
+
+    /// @brief Retrieves the length of the positional argument's value.
+    /// @return The length of the value as a `std::size_t`.
+    auto get_value_length() const -> std::size_t override
+    {
+        std::size_t max_length = 0;
+        for (const auto &value : values) {
+            max_length = std::max(max_length, value.size());
+        }
+        return max_length;
+    }
 };
 
 /// @class Separator

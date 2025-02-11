@@ -120,12 +120,13 @@ endif()
 # -----------------------------------------------------------------------------
 
 if(BUILD_EXAMPLES)
-    # Add the example.
     add_executable(${PROJECT_NAME}_example ${PROJECT_SOURCE_DIR}/examples/example.cpp)
-    # Inlcude header directories.
     target_include_directories(${PROJECT_NAME}_example PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    # Liking for the test.
     target_link_libraries(${PROJECT_NAME}_example ${PROJECT_NAME})
+
+    add_executable(${PROJECT_NAME}_example_positional ${PROJECT_SOURCE_DIR}/examples/example_positional.cpp)
+    target_include_directories(${PROJECT_NAME}_example_positional PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_link_libraries(${PROJECT_NAME}_example_positional ${PROJECT_NAME})
 endif()
 
 # -----------------------------------------------------------------------------

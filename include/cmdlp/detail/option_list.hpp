@@ -49,11 +49,15 @@ class OptionList
 {
 public:
     /// @brief Alias for a vector of `Option` pointers.
-    using option_list_t    = std::vector<std::shared_ptr<Option>>;
+    using option_list_t            = std::vector<std::shared_ptr<Option>>;
     /// @brief Alias for an iterator over the option list.
-    using iterator_t       = std::vector<std::shared_ptr<Option>>::iterator;
+    using iterator_t               = std::vector<std::shared_ptr<Option>>::iterator;
     /// @brief Alias for a const iterator over the option list.
-    using const_iterator_t = std::vector<std::shared_ptr<Option>>::const_iterator;
+    using const_iterator_t         = std::vector<std::shared_ptr<Option>>::const_iterator;
+    /// @brief Alias for a reverse iterator over the option list.
+    using reverse_iterator_t       = std::vector<std::shared_ptr<Option>>::reverse_iterator;
+    /// @brief Alias for a const reverse iterator over the option list.
+    using const_reverse_iterator_t = std::vector<std::shared_ptr<Option>>::const_reverse_iterator;
 
     /// @brief Constructs an empty `OptionList`.
     OptionList() = default;
@@ -222,6 +226,14 @@ public:
     /// @return A const iterator to the end of the list.
     auto end() const -> const_iterator_t { return options.end(); }
 
+    /// @brief Returns a const reverse iterator to the beginning of the list.
+    /// @return A const reverse iterator to the beginning of the list.
+    auto rbegin() const -> const_reverse_iterator_t { return options.rbegin(); }
+
+    /// @brief Returns a const reverse iterator to the end of the list.
+    /// @return A const reverse iterator to the end of the list.
+    auto rend() const -> const_reverse_iterator_t { return options.rend(); }
+
     /// @brief Retrieves the length of the longest short option name.
     /// @tparam T The type to return (default is `std::size_t`).
     /// @return The length of the longest short option name.
@@ -263,6 +275,22 @@ private:
     /// @brief The length of the longest value.
     std::size_t longest_value{0};
 };
+
+/// @brief Retrieves the value of an option.
+/// @tparam T The expected type of the option value.
+/// @param option_string The short or long name of the option.
+/// @return The value of the option, or the default value of `T` if not found.
+template <>
+auto OptionList::getOption(const std::string &option_string) const -> std::vector<std::string>
+{
+    const std::shared_ptr<Option> option = this->findOption(option_string);
+    if (option != nullptr) {
+        if (auto plopt = std::dynamic_pointer_cast<PositionalList>(option)) {
+            return plopt->values;
+        }
+    }
+    return std::vector<std::string>();
+}
 
 /// @brief Specialization of `getOption` for `std::string`.
 /// @param option_string The short or long name of the option.

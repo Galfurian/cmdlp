@@ -11,10 +11,11 @@ int main(int argc, char *argv[])
 
     // Adding options with default values and descriptions
     parser.addSeparator("Normal options:");
-    parser.addOption("-db", "--double", "Double value", 0.2, false);
-    parser.addOption("-i", "--int", "An integer value", -1, false);
-    parser.addOption("-u", "--unsigned", "An unsigned value", 1, false);
-    parser.addOption("-s", "--string", "A string.. actually, a single word", "hello", true);
+    parser.addOption("-db", "--double", "Double value", false, 0.2);
+    parser.addOption("-i", "--int", "An integer value", false, -1);
+    parser.addOption("-u", "--unsigned", "An unsigned value", false, 1);
+    parser.addOption("-s", "--string", "A string.", true);
+    parser.addOption("-out", "--output", "Output file.", false, "output.txt");
 
     parser.addSeparator("Toggle options:");
     parser.addToggle("-h", "--help", "Shows this help for the program.", false);
@@ -25,8 +26,7 @@ int main(int argc, char *argv[])
     parser.addMultiOption("-id", "--index", "Select the index.", {"0", "1"}, "1");
 
     parser.addSeparator("Positional options:");
-    parser.addPositionalOption("-in", "--input", "input.txt", "Input file.", true);
-    parser.addPositionalOption("-out", "--output", "output.txt", "Output file.", false);
+    parser.addPositionalOption("-in", "--input", "Input file.", true, "input.txt");
 
     // Parse options.
     parser.parseOptions();

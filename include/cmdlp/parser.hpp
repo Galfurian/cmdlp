@@ -36,25 +36,6 @@ public:
     {
     }
 
-    /// @brief Adds a multi-value option to the parser.
-    /// @param _opt_short The short version of the option (e.g., "-m").
-    /// @param _opt_long The long version of the option (e.g., "--mode").
-    /// @param _description A description of the option, displayed in the help text.
-    /// @param _allowed_values The set of predefined values for the option.
-    /// @param _default_value The default value for the option.
-    /// @throws std::invalid_argument if the default value is not in the list of allowed values.
-    void addMultiOption(
-        const std::string &_opt_short,
-        const std::string &_opt_long,
-        const std::string &_description,
-        const std::vector<std::string> &_allowed_values,
-        const std::string &_default_value)
-    {
-        // Add the option to the list.
-        options.addOption(std::make_shared<detail::MultiOption>(
-            _opt_short, _opt_long, _description, _allowed_values, _default_value));
-    }
-
     /// @brief Adds a value-based option to the parser.
     /// @tparam T The type of the option's default value.
     /// @param _opt_short The short version of the option (e.g., "-f").
@@ -67,15 +48,32 @@ public:
         const std::string &_opt_short,
         const std::string &_opt_long,
         const std::string &_description,
-        const T &_value,
-        bool _required)
+        bool _required,
+        const T &_value)
     {
         // Turn the value to string.
         std::stringstream ss;
         ss << _value;
         // Add the option to the list.
         options.addOption(
-            std::make_shared<detail::ValueOption>(_opt_short, _opt_long, _description, ss.str(), _required));
+            std::make_shared<detail::ValueOption>(_opt_short, _opt_long, _description, _required, ss.str()));
+    }
+
+    /// @brief Adds a value-based option to the parser.
+    /// @tparam T The type of the option's default value.
+    /// @param _opt_short The short version of the option (e.g., "-f").
+    /// @param _opt_long The long version of the option (e.g., "--file").
+    /// @param _description A description of the option, displayed in the help text.
+    /// @param _required Indicates whether the option is required.
+    void addOption(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        bool _required)
+    {
+        // Add the option to the list.
+        options.addOption(
+            std::make_shared<detail::ValueOption>(_opt_short, _opt_long, _description, _required, std::string()));
     }
 
     /// @brief Adds a toggle-based option to the parser.
@@ -93,21 +91,69 @@ public:
         options.addOption(std::make_shared<detail::ToggleOption>(_opt_short, _opt_long, _description, _toggled));
     }
 
+    /// @brief Adds a multi-value option to the parser.
+    /// @param _opt_short The short version of the option (e.g., "-m").
+    /// @param _opt_long The long version of the option (e.g., "--mode").
+    /// @param _description A description of the option, displayed in the help text.
+    /// @param _allowed_values The set of predefined values for the option.
+    /// @param _value The default value for the option.
+    /// @throws std::invalid_argument if the default value is not in the list of allowed values.
+    void addMultiOption(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        const std::vector<std::string> &_allowed_values,
+        const std::string &_value)
+    {
+        // Add the option to the list.
+        options.addOption(
+            std::make_shared<detail::MultiOption>(_opt_short, _opt_long, _description, _allowed_values, _value));
+    }
+
     /// @brief Adds a positional option to the parser.
     /// @param _opt_short The short version of the option (e.g., "-f").
     /// @param _opt_long The long version of the option (e.g., "--file").
-    /// @param _default_value The default value for the option.
     /// @param _description A description of the option.
     /// @param _required Whether the option is required.
+    /// @param _value The default value for the option.
     void addPositionalOption(
         const std::string &_opt_short,
         const std::string &_opt_long,
-        const std::string &_default_value,
         const std::string &_description,
-        bool _required)
+        bool _required            = false,
+        const std::string &_value = std::string())
     {
+        // Check if any PositionalList exists already (must be the last positional argument).
+        for (auto it = options.rbegin(); it != options.rend(); ++it) {
+            if (std::dynamic_pointer_cast<detail::PositionalList>(*it)) {
+                throw std::runtime_error("PositionalList must be the last positional argument.");
+            }
+            // Stop as soon as we encounter a non-positional option.
+            if (!std::dynamic_pointer_cast<detail::PositionalOption>(*it)) {
+                break;
+            }
+        }
         options.addOption(
-            std::make_shared<detail::PositionalOption>(_opt_short, _opt_long, _default_value, _description, _required));
+            std::make_shared<detail::PositionalOption>(_opt_short, _opt_long, _description, _required, _value));
+    }
+
+    /// @brief Adds a positional list option to the parser.
+    /// @param _opt_short The short version of the option (e.g., "-f").
+    /// @param _opt_long The long version of the option (e.g., "--files").
+    /// @param _description A description of the positional list.
+    /// @param _required Whether the list is required (default: false).
+    void addPositionalList(
+        const std::string &_opt_short,
+        const std::string &_opt_long,
+        const std::string &_description,
+        bool _required = false)
+    {
+        for (auto it = options.rbegin(); it != options.rend(); ++it) {
+            if (std::dynamic_pointer_cast<detail::PositionalList>(*it)) {
+                throw std::runtime_error("Only one PositionalList is allowed.");
+            }
+        }
+        options.addOption(std::make_shared<detail::PositionalList>(_opt_short, _opt_long, _description, _required));
     }
 
     /// @brief Adds a separator for grouping options in the help message.
@@ -133,7 +179,8 @@ public:
     /// If a required option is missing, the program will print an error and exit.
     void parseOptions()
     {
-        size_t pos_arg_index = 0;
+        size_t pos_arg_index         = 0;
+        size_t total_positional_args = tokenizer.getPositionalArgumentCount();
 
         for (const auto &option : options) {
             if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
@@ -143,14 +190,16 @@ public:
             } else if (auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
                 this->parseToggleOption(topt);
             } else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                if (tokenizer.hasPositionalArgument(pos_arg_index)) {
-                    posopt->value = tokenizer.getPositionalArgument(pos_arg_index++);
-                } else if (posopt->required) {
-                    std::cerr << "Missing required positional argument: " << posopt->description << "\n";
-                    std::cerr << this->getHelp() << "\n";
-                    std::exit(1);
-                }
+                this->parsePositionalOption(posopt, pos_arg_index, total_positional_args);
+            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
+                this->parsePositionalList(poslist, pos_arg_index, total_positional_args);
             }
+        }
+
+        if (pos_arg_index < total_positional_args) {
+            std::cerr << "Unexpected extra positional arguments provided.\n";
+            std::cerr << this->getHelp() << "\n";
+            std::exit(1);
         }
 
         option_parsed = true;
@@ -162,15 +211,17 @@ public:
     auto getHelp() const -> std::string
     {
         std::stringstream ss;
+        ss << this->generateUsage() << "\n";
         for (const auto &option : options) {
             auto sepr = std::dynamic_pointer_cast<detail::Separator>(option);
             if (sepr) {
                 ss << "\n" << sepr->description << "\n";
             } else {
-                auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option);
-                auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option);
-                auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option);
-                auto popt = std::dynamic_pointer_cast<detail::PositionalOption>(option);
+                auto vopt  = std::dynamic_pointer_cast<detail::ValueOption>(option);
+                auto topt  = std::dynamic_pointer_cast<detail::ToggleOption>(option);
+                auto mopt  = std::dynamic_pointer_cast<detail::MultiOption>(option);
+                auto popt  = std::dynamic_pointer_cast<detail::PositionalOption>(option);
+                auto plopt = std::dynamic_pointer_cast<detail::PositionalList>(option);
                 ss << "[" << std::setw(options.getLongestShortOption<int>()) << std::left << option->opt_short << "] ";
                 ss << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
                 ss << " (" << std::setw(options.getLongestValue<int>()) << std::right;
@@ -182,10 +233,19 @@ public:
                     ss << mopt->selected_value << ")   : ";
                 } else if (popt) {
                     ss << popt->value << ") " << (popt->required ? "R" : " ") << " : ";
+                } else if (plopt) {
+                    if (plopt->values.empty()) {
+                        ss << "None";
+                    } else {
+                        for (const auto &val : plopt->values) {
+                            ss << val << " ";
+                        }
+                    }
+                    ss << ") " << (plopt->required ? "R" : " ") << " : ";
                 }
                 ss << option->description;
                 if (mopt != nullptr) {
-                    ss << " " << mopt->print_list();
+                    ss << " [" << mopt->print_list() << "]";
                 }
                 ss << "\n";
             }
@@ -240,6 +300,91 @@ private:
         if (tokenizer.hasOption(topt->opt_short) || tokenizer.hasOption(topt->opt_long)) {
             topt->toggled = true;
         }
+    }
+
+    /// @brief Parses a positional option from the command-line arguments.
+    /// @param posopt The PositionalOption to be parsed.
+    /// @param pos_arg_index The current index of positional arguments.
+    /// @param total_positional_args The total number of positional arguments.
+    void parsePositionalOption(
+        const std::shared_ptr<detail::PositionalOption> &posopt,
+        std::size_t &pos_arg_index,
+        std::size_t total_positional_args)
+    {
+        if (pos_arg_index < total_positional_args) {
+            posopt->value = tokenizer.getPositionalArgument(pos_arg_index++);
+        } else if (posopt->required) {
+            std::cerr << "Missing required positional argument: " << posopt->description << "\n";
+            std::cerr << this->getHelp() << "\n";
+            std::exit(1);
+        }
+    }
+
+    /// @brief Parses a positional list from the command-line arguments.
+    /// @param poslist The PositionalList to be parsed.
+    /// @param pos_arg_index The current index of positional arguments.
+    /// @param total_positional_args The total number of positional arguments.
+    void parsePositionalList(
+        const std::shared_ptr<detail::PositionalList> &poslist,
+        std::size_t &pos_arg_index,
+        std::size_t total_positional_args)
+    {
+        while (pos_arg_index < total_positional_args) {
+            poslist->values.push_back(tokenizer.getPositionalArgument(pos_arg_index++));
+        }
+        if (poslist->required && poslist->values.empty()) {
+            std::cerr << "Missing required positional list of arguments for: `" << poslist->description << "`\n";
+            std::cerr << this->getHelp() << "\n";
+            std::exit(1);
+        }
+    }
+
+    /// @brief Generates a concise usage string for the command.
+    /// @return A formatted usage string.
+    std::string generateUsage() const
+    {
+        std::stringstream usage;
+        usage << "Usage: command";
+
+        bool has_optional_options = false;
+        std::vector<std::string> positional_args;
+
+        for (const auto &option : options) {
+            // Handle required ValueOption and MultiOption
+            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
+                if (vopt->required) {
+                    usage << " " << vopt->opt_long << " VALUE";
+                } else {
+                    has_optional_options = true;
+                }
+            } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
+                usage << " " << mopt->opt_long << " {" << mopt->print_list() << "}";
+            }
+            // Mark if any optional ToggleOption exists
+            else if (std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
+                has_optional_options = true;
+            }
+            // Collect positional arguments
+            else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
+                std::string clean_name = posopt->opt_long.substr(2); // Remove '--' prefix
+                positional_args.push_back("<" + clean_name + ">");
+            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
+                std::string clean_name = poslist->opt_long.substr(2); // Remove '--' prefix
+                positional_args.push_back("<" + clean_name + "...>");
+            }
+        }
+
+        // Add generic placeholder for optional options
+        if (has_optional_options) {
+            usage << " [OPTIONS...]";
+        }
+
+        // Append positional arguments
+        for (const auto &pos_arg : positional_args) {
+            usage << " " << pos_arg;
+        }
+
+        return usage.str();
     }
 
     /// @brief Tokenizer for parsing command-line arguments.

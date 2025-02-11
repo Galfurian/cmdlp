@@ -97,6 +97,21 @@ public:
         return false;
     }
 
+    /// @brief Retrieves the total number of positional arguments.
+    /// @return The count of positional arguments.
+    auto getPositionalArgumentCount() const -> size_t
+    {
+        std::size_t pos_count = 0;
+        for (std::size_t pos = 0; pos < tokens.size(); ++pos) {
+            if (isOption(tokens[pos])) {
+                ++pos; // Skip the next token assuming it's the option's value.
+            } else {
+                ++pos_count; // Count as a positional argument.
+            }
+        }
+        return pos_count;
+    }
+
     /// @brief Retrieves all tokens (options, values, and positional arguments).
     /// @return A vector containing all tokens for raw access.
     auto getTokens() const -> const std::vector<std::string> & { return tokens; }
