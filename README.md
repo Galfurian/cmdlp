@@ -1,3 +1,7 @@
+---
+layout: default
+---
+
 # Command-Line Parsing Library (`cmdlp`)
 
 [![Ubuntu](https://github.com/Galfurian/cmdlp/actions/workflows/ubuntu.yml/badge.svg)](https://github.com/Galfurian/cmdlp/actions/workflows/ubuntu.yml)
@@ -246,6 +250,8 @@ The other support classes:
   - **Separator**: Represents an options separator.
   - **PositionalOption**: Represents options that are not preceded by a flag and
     that are in a given order.
+  - **PositionalList**: Represents a list of options that are not preceded by a
+    flag and that are at the end of the command line.
 
 ## Contributing
 
