@@ -22,10 +22,10 @@ int main(int argc, char *argv[])
 
     // Retrieve and display parsed positional options.
     std::cout << "Parsed positional options:\n";
-    std::cout << "    Input  (-i) : " << parser.getOption<std::string>("--input") << "\n";
-    std::cout << "    Output (-o) : " << parser.getOption<std::string>("--output") << "\n";
+    std::cout << " Input  (-i) : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << " Output (-o) : " << parser.getOption<std::string>("--output") << "\n";
     const auto &extra_files = parser.getOption<cmdlp::Values>("--files");
-    std::cout << "    Extra  (-f) : ";
+    std::cout << " Extra  (-f) : ";
     for (const auto &file : extra_files) {
         std::cout << file << " ";
     }

@@ -14,11 +14,12 @@
 - Support for short (`-o`) and long (`--option`) options.
 - Toggle options (e.g., `--verbose` for enabling verbose output).
 - Value-based options (e.g., `--file input.txt`).
-- Multi-value options (e.g., `--mode auto|manual|test`).
-- Positional options (e.g. `./program --verbose a.txt b.txt`, where `a.txt` and
-  `b.txt` are the two positional options).
-- Grouping and labeling options in help messages.
-- Automatically generated help messages.
+- Multi-value options (e.g., `--mode auto` where mode can be `auto|manual|test`).
+- Positional options (e.g. `./program --verbose a.txt b.txt`, where `a.txt` and `b.txt` are the two positional options).
+- Positional lists (e.g. `./program a.txt b.txt c.txt`, where the values are returned as a `std::vector<std::string>`).
+- Grouping and labeling options via **separators**.
+- Automatically generated **usage** message.
+- Automatically generated **help** messages.
 
 ## Installation
 
@@ -44,17 +45,17 @@ int main(int argc, char *argv[]) {
     cmdlp::Parser parser(argc, argv);
 
     // Define options
-    parser.addOption("-db", "--double", "Double value", 0.2, false);
-    parser.addOption("-i", "--int", "An integer value", -1, false);
+    parser.addOption("-db", "--double", "Double value", false, 0.2);
+    parser.addOption("-i", "--int", "An integer value", false, -1);
     parser.addToggle("-h", "--help", "Shows help for the program.", false);
 
     // Parse options
     parser.parseOptions();
 
     // Retrieve and display parsed options
-    std::cout << "Double value: " << parser.getOption<double>("--double") << "\n";
-    std::cout << "Integer value: " << parser.getOption<int>("--int") << "\n";
-    std::cout << "Help: " << parser.getOption<bool>("--help") << "\n";
+    std::cout << "Double value  : " << parser.getOption<double>("--double") << "\n";
+    std::cout << "Integer value : " << parser.getOption<int>("--int") << "\n";
+    std::cout << "Help          : " << parser.getOption<bool>("--help") << "\n";
 
     return 0;
 }
@@ -69,9 +70,9 @@ Running the above program with the following options:
 Produces:
 
 ```bash
-Double value: 3.14
-Integer value: 42
-Help: 1
+Double value  : 3.14
+Integer value : 42
+Help          : 1
 ```
 
 ## Defining and Parsing Positional Arguments
@@ -88,9 +89,9 @@ int main(int argc, char *argv[]) {
     cmdlp::Parser parser(argc, argv);
 
     // Required positional option.
-    parser.addPositionalOption("-in", "--input", "input.txt", "Input file.", true);
+    parser.addPositionalOption("-in", "--input", "Input file.", true);
     // Optional positional option.
-    parser.addPositionalOption("-out", "--output", "output.txt", "Output file.", false);
+    parser.addPositionalOption("-out", "--output", "Output file.", false);
 
     // Parse options.
     parser.parseOptions();
@@ -101,6 +102,68 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
+```
+
+So if you provide.
+
+```bash
+\$ ./example in.txt
+```
+
+Produces:
+
+```bash
+ Input  (-i) : in.txt
+ Output (-o) : 
+```
+
+## Defining and Parsing a Positional List
+
+Positional lists are unflagged inputs placed at the end of the command-line
+input. Here is an example demonstrating how to define and parse positional
+lists:
+
+```cpp
+#include <iostream>
+#include "cmdlp/parser.hpp"
+
+int main(int argc, char *argv[]) {
+    cmdlp::Parser parser(argc, argv);
+
+    // Positional options.
+    parser.addPositionalOption("-i", "--input", "Input file.", true);
+    parser.addPositionalOption("-o", "--output", "Output file.", true);
+    // Positional list.
+    parser.addPositionalList("-f", "--files", "List of extra files.", false);
+
+    // Parse options.
+    parser.parseOptions();
+
+    // Retrieve and display positional options.
+    std::cout << " Input  (-i) : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << " Output (-o) : " << parser.getOption<std::string>("--output") << "\n";
+    std::cout << " Extra  (-f) : ";
+    for (const auto &file : parser.getOption<cmdlp::Values>("--files")) {
+        std::cout << file << " ";
+    }
+    std::cout << "\n";
+
+    return 0;
+}
+```
+
+So if you provide.
+
+```bash
+\$ ./example in.txt out.txt a.txt b.txt c.txt
+```
+
+Produces:
+
+```bash
+ Input  (-i) : in.txt
+ Output (-o) : out.txt
+ Extra  (-f) : a.txt b.txt c.txt
 ```
 
 ## Example
