@@ -19,6 +19,7 @@ Checks:
 - -altera-id-dependent-backward-branch
 - -llvm-header-guard
 - -modernize-return-braced-init-list
+- -modernize-use-default-member-init
 - -modernize-use-nodiscard
 - -modernize-type-traits
 - -modernize-concat-nested-namespaces
@@ -31,6 +32,7 @@ Checks:
 - -cppcoreguidelines-avoid-non-const-global-variables
 - -cppcoreguidelines-avoid-magic-numbers
 - -cppcoreguidelines-avoid-do-while
+- -cppcoreguidelines-use-default-member-init
 - -readability-redundant-member-init
 
 WarningsAsErrors: ''

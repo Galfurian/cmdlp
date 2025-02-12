@@ -10,18 +10,22 @@ int main(int argc, char *argv[])
     cmdlp::Parser parser(argc, argv);
 
     parser.addSeparator("Positional options:");
-    parser.addPositionalOption("-in", "--input", "Input file.", true);
-    parser.addPositionalList("-files", "--files", "List of extra files.", false);
+    parser.addPositionalOption("-i", "--input", "Input file.", true);
+    parser.addPositionalOption("-o", "--output", "Output file.", true);
+    parser.addPositionalList("-f", "--files", "List of extra files.", false);
 
     // Parse options.
     parser.parseOptions();
-    std::cout << parser.getHelp() << "\n";
+    std::cout << std::string(40, '=') << "\n";
+    std::cout << parser.getHelp();
+    std::cout << std::string(40, '=') << "\n";
 
     // Retrieve and display parsed positional options.
     std::cout << "Parsed positional options:\n";
-    std::cout << "    Input (-in)    : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << "    Input  (-i) : " << parser.getOption<std::string>("--input") << "\n";
+    std::cout << "    Output (-o) : " << parser.getOption<std::string>("--output") << "\n";
     const auto &extra_files = parser.getOption<cmdlp::Values>("--files");
-    std::cout << "    Extra (-files) : ";
+    std::cout << "    Extra  (-f) : ";
     for (const auto &file : extra_files) {
         std::cout << file << " ";
     }

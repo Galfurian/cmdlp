@@ -6,6 +6,7 @@
 
 #include <iomanip>
 #include <iostream>
+#include <set>
 #include <sstream>
 
 #include "detail/option.hpp"
@@ -32,8 +33,41 @@ public:
     /// @details Initializes the tokenizer and the option list.
     Parser(int argc, char **argv)
         : tokenizer(argc, argv)
-
+        , options()
+        , option_parsed()
     {
+    }
+
+    /// @brief Constructor for std::list<std::string>
+    /// @param args The list of arguments.
+    Parser(const std::list<std::string> &args)
+        : tokenizer(args)
+        , options()
+        , option_parsed()
+    {
+        // Nothing to do.
+    }
+
+    /// @brief Constructor for std::vector<std::string>
+    /// @param args The list of arguments.
+    Parser(const std::vector<std::string> &args)
+        : tokenizer(args)
+        , options()
+        , option_parsed()
+    {
+        // Nothing to do.
+    }
+
+    /// @brief Constructor for std::array<std::string, N>
+    /// @tparam N The number of elements.
+    /// @param args The list of arguments.
+    template <std::size_t N>
+    Parser(const std::array<std::string, N> &args)
+        : tokenizer(args)
+        , options()
+        , option_parsed()
+    {
+        // Nothing to do.
     }
 
     /// @brief Adds a value-based option to the parser.
@@ -124,13 +158,9 @@ public:
         const std::string &_value = std::string())
     {
         // Check if any PositionalList exists already (must be the last positional argument).
-        for (auto it = options.rbegin(); it != options.rend(); ++it) {
-            if (std::dynamic_pointer_cast<detail::PositionalList>(*it)) {
+        for (const auto &option : options) {
+            if (std::dynamic_pointer_cast<detail::PositionalList>(option)) {
                 throw std::runtime_error("PositionalList must be the last positional argument.");
-            }
-            // Stop as soon as we encounter a non-positional option.
-            if (!std::dynamic_pointer_cast<detail::PositionalOption>(*it)) {
-                break;
             }
         }
         options.addOption(
@@ -148,8 +178,8 @@ public:
         const std::string &_description,
         bool _required = false)
     {
-        for (auto it = options.rbegin(); it != options.rend(); ++it) {
-            if (std::dynamic_pointer_cast<detail::PositionalList>(*it)) {
+        for (const auto &option : options) {
+            if (std::dynamic_pointer_cast<detail::PositionalList>(option)) {
                 throw std::runtime_error("Only one PositionalList is allowed.");
             }
         }
@@ -179,8 +209,8 @@ public:
     /// If a required option is missing, the program will print an error and exit.
     void parseOptions()
     {
-        size_t pos_arg_index         = 0;
-        size_t total_positional_args = tokenizer.getPositionalArgumentCount();
+        std::set<std::size_t> used_tokens;
+        size_t pos_arg_index = 0;
 
         for (const auto &option : options) {
             if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
@@ -190,16 +220,10 @@ public:
             } else if (auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
                 this->parseToggleOption(topt);
             } else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                this->parsePositionalOption(posopt, pos_arg_index, total_positional_args);
+                this->parsePositionalOption(posopt, pos_arg_index);
             } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
-                this->parsePositionalList(poslist, pos_arg_index, total_positional_args);
+                this->parsePositionalList(poslist, pos_arg_index);
             }
-        }
-
-        if (pos_arg_index < total_positional_args) {
-            std::cerr << "Unexpected extra positional arguments provided.\n";
-            std::cerr << this->getHelp() << "\n";
-            std::exit(1);
         }
 
         option_parsed = true;
@@ -210,7 +234,7 @@ public:
     auto getUsage() const -> std::string
     {
         std::stringstream usage;
-        usage << "Usage: command";
+        usage << "Usage: " << tokenizer.front();
 
         std::vector<std::string> positional_args;
 
@@ -265,15 +289,15 @@ public:
                 ssopt << " " << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
                 ssopt << " " << std::setw(options.getLongestValue<int>()) << std::left;
                 if (vopt) {
-                    ssopt << (vopt->required ? "<req>" : vopt->value);
+                    ssopt << ((vopt->required && vopt->value.empty()) ? "<req>" : vopt->value);
                 } else if (topt) {
                     ssopt << (topt->toggled ? "true" : "false");
                 } else if (mopt) {
                     ssopt << mopt->value;
                 } else if (popt) {
-                    ssopt << (popt->required ? "<req>" : popt->value);
+                    ssopt << ((popt->required && popt->value.empty()) ? "<req>" : popt->value);
                 } else if (lopt) {
-                    ssopt << (lopt->required ? "<req>" : lopt->print_values());
+                    ssopt << ((lopt->required && lopt->values.empty()) ? "<req>" : lopt->print_values());
                 }
                 ssopt << " : ";
                 if (mopt != nullptr) {
@@ -293,87 +317,129 @@ public:
 
 private:
     /// @brief Parses a value-holding option from the command-line arguments.
-    /// @param vopt The ValueOption to be parsed.
+    /// @param option The ValueOption to be parsed.
     /// @return true if the option is parsed successfully, false otherwise.
-    auto parseValueOption(const std::shared_ptr<detail::ValueOption> &vopt) -> bool
+    auto parseValueOption(const std::shared_ptr<detail::ValueOption> &option) -> bool
     {
-        std::string value = tokenizer.getOption(vopt->opt_short);
+        std::string value = tokenizer.getOption(option->opt_short);
         if (value.empty()) {
-            value = tokenizer.getOption(vopt->opt_long);
+            value = tokenizer.getOption(option->opt_long);
             if (value.empty()) {
-                if (vopt->required) {
-                    std::cerr << "Cannot find required option: " << vopt->opt_long << " [" << vopt->opt_short << "]\n";
+                if (option->required) {
+                    std::cerr << "Cannot find required option: " << option->opt_long << " [" << option->opt_short
+                              << "]\n";
                     std::cerr << this->getHelp() << "\n";
                     std::exit(1); // Exit if required option is missing.
                 }
                 return false; // Skip optional missing options.
             }
         }
-        vopt->value = value;
-        options.updateLongestValue(vopt->value.length());
+        option->value = value;
+        options.updateLongestValue(option->value.length());
         return true;
     }
 
     /// @brief Parses a multi-option from the command-line arguments.
-    /// @param mopt The MultiOption to be parsed.
+    /// @param option The MultiOption to be parsed.
     /// @return true if the option is parsed successfully, false otherwise.
-    auto parseMultiOption(const std::shared_ptr<detail::MultiOption> &mopt) -> bool
+    auto parseMultiOption(const std::shared_ptr<detail::MultiOption> &option) -> bool
     {
-        std::string value = tokenizer.getOption(mopt->opt_short);
+        std::string value = tokenizer.getOption(option->opt_short);
         if (value.empty()) {
-            value = tokenizer.getOption(mopt->opt_long);
+            value = tokenizer.getOption(option->opt_long);
             if (value.empty()) {
                 return false; // MultiOptions are not required, skip if not found.
             }
         }
-        mopt->setValue(value);
-        options.updateLongestValue(mopt->value.length());
+        option->setValue(value);
+        options.updateLongestValue(option->value.length());
         return true;
     }
 
     /// @brief Parses a toggle option from the command-line arguments.
-    /// @param topt The ToggleOption to be parsed.
-    void parseToggleOption(const std::shared_ptr<detail::ToggleOption> &topt)
+    /// @param option The ToggleOption to be parsed.
+    void parseToggleOption(const std::shared_ptr<detail::ToggleOption> &option)
     {
-        if (tokenizer.hasOption(topt->opt_short) || tokenizer.hasOption(topt->opt_long)) {
-            topt->toggled = true;
+        if (tokenizer.hasOption(option->opt_short) || tokenizer.hasOption(option->opt_long)) {
+            option->toggled = true;
         }
     }
 
     /// @brief Parses a positional option from the command-line arguments.
-    /// @param posopt The PositionalOption to be parsed.
-    /// @param pos_arg_index The current index of positional arguments.
-    /// @param total_positional_args The total number of positional arguments.
-    void parsePositionalOption(
-        const std::shared_ptr<detail::PositionalOption> &posopt,
-        std::size_t &pos_arg_index,
-        std::size_t total_positional_args)
+    /// @param option The PositionalOption to be parsed.
+    /// @param pos_arg_index The current index being considered for positional arguments.
+    void parsePositionalOption(const std::shared_ptr<detail::PositionalOption> &option, std::size_t &pos_arg_index)
     {
-        if (pos_arg_index < total_positional_args) {
-            posopt->value = tokenizer.getPositionalArgument(pos_arg_index++);
-            options.updateLongestValue(posopt->value.length());
-        } else if (posopt->required) {
-            std::cerr << "Missing required positional argument: " << posopt->description << "\n";
+        // Get all toggle options to differentiate them from other arguments.
+        auto toggles          = this->getToggleOptions();
+        // Keep track of the current positional argument.
+        std::size_t arg_index = 0;
+        // Iterate over tokens.
+        for (auto prev = tokenizer.begin(), it = std::next(prev); it != tokenizer.end(); ++it, ++prev) {
+            // Skip the token if it is an option.
+            if (detail::Tokenizer::isOption(*it)) {
+                continue;
+            }
+            // Check if the previous token is either not an option or is a toggle.
+            // If not, skip this token as it isn't a valid positional argument.
+            if (detail::Tokenizer::isOption(*prev) && !isToggle(toggles, *prev)) {
+                continue;
+            }
+            // We assign the positional argument.
+            if (arg_index++ == pos_arg_index) {
+                // Set the value.
+                option->value = *it;
+                // Move the argument index.
+                ++pos_arg_index;
+                // Update the longest value.
+                options.updateLongestValue(it->length());
+                // Exit after assigning the positional argument.
+                return;
+            }
+        }
+        // Handle missing required positional argument
+        if (option->required) {
+            std::cerr << "Missing required positional argument: " << option->description << "\n";
             std::cerr << this->getHelp() << "\n";
             std::exit(1);
         }
     }
 
     /// @brief Parses a positional list from the command-line arguments.
-    /// @param poslist The PositionalList to be parsed.
+    /// @param option The PositionalList to be parsed.
+    /// @param tokens The list of tokens from the tokenizer.
+    /// @param used_tokens A set of indices marking which tokens are already used.
     /// @param pos_arg_index The current index of positional arguments.
-    /// @param total_positional_args The total number of positional arguments.
-    void parsePositionalList(
-        const std::shared_ptr<detail::PositionalList> &poslist,
-        std::size_t &pos_arg_index,
-        std::size_t total_positional_args)
+    void parsePositionalList(const std::shared_ptr<detail::PositionalList> &option, std::size_t &pos_arg_index)
     {
-        while (pos_arg_index < total_positional_args) {
-            poslist->values.push_back(tokenizer.getPositionalArgument(pos_arg_index++));
+        // Get all toggle options to differentiate them from other arguments.
+        auto toggles          = this->getToggleOptions();
+        // Keep track of the current positional argument.
+        std::size_t arg_index = 0;
+        // Iterate over tokens.
+        for (auto prev = tokenizer.begin(), it = std::next(prev); it != tokenizer.end(); ++it, ++prev) {
+            // Skip the token if it is an option.
+            if (detail::Tokenizer::isOption(*it)) {
+                continue;
+            }
+            // Check if the previous token is either not an option or is a toggle.
+            // If not, skip this token as it isn't a valid positional argument.
+            if (detail::Tokenizer::isOption(*prev) && !isToggle(toggles, *prev)) {
+                continue;
+            }
+            // We assign the positional argument.
+            if (arg_index++ >= pos_arg_index) {
+                // Add the value.
+                option->values.emplace_back(*it);
+                // Move the argument index.
+                ++pos_arg_index;
+                // Update the longest value.
+                options.updateLongestValue(option->print_values().length());
+            }
         }
-        options.updateLongestValue(poslist->print_values().length());
-        if (poslist->required && poslist->values.empty()) {
-            std::cerr << "Missing required positional list of arguments for: `" << poslist->description << "`\n";
+        // Handle missing required positional argument
+        if (option->values.empty() && option->required) {
+            std::cerr << "Missing required positional list argument: " << option->description << "\n";
             std::cerr << this->getHelp() << "\n";
             std::exit(1);
         }
@@ -385,11 +451,11 @@ private:
     /// @param tabulation The indentation applied to all subsequent lines.
     /// @param max_line_length The maximum length of each line.
     /// @return A formatted string with proper line breaks and indentation.
-    std::string format_paragraph(
+    auto format_paragraph(
         const std::string &text,
         std::size_t initial_offset,
         std::size_t tabulation,
-        std::size_t max_line_length) const
+        std::size_t max_line_length) const -> std::string
     {
         std::ostringstream formatted;
         std::size_t current_length = initial_offset;
@@ -416,6 +482,32 @@ private:
         }
 
         return formatted.str();
+    }
+
+    /// @brief Retrieves all toggle options from the current option list.
+    /// @return A vector of shared pointers to ToggleOptions.
+    auto getToggleOptions() const -> std::vector<std::shared_ptr<detail::ToggleOption>>
+    {
+        auto toggles = options.filter([](const std::shared_ptr<detail::Option> &opt) {
+            return std::dynamic_pointer_cast<detail::ToggleOption>(opt) != nullptr;
+        });
+        std::vector<std::shared_ptr<detail::ToggleOption>> toggle_options;
+        for (const auto &entry : toggles) {
+            toggle_options.emplace_back(std::dynamic_pointer_cast<detail::ToggleOption>(entry));
+        }
+        return toggle_options;
+    }
+
+    /// @brief Checks if a given option string is a toggle.
+    /// @param toggles The vector of toggle options.
+    /// @param option The option to check.
+    /// @return true if the option matches a toggle option, false otherwise.
+    static auto isToggle(const std::vector<std::shared_ptr<detail::ToggleOption>> &toggles, const std::string &option)
+        -> bool
+    {
+        return std::any_of(toggles.begin(), toggles.end(), [&](const auto &entry) {
+            return option == entry->opt_short || option == entry->opt_long;
+        });
     }
 
     /// @brief Tokenizer for parsing command-line arguments.

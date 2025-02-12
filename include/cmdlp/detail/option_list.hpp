@@ -49,15 +49,7 @@ class OptionList
 {
 public:
     /// @brief Alias for a vector of `Option` pointers.
-    using option_list_t            = std::vector<std::shared_ptr<Option>>;
-    /// @brief Alias for an iterator over the option list.
-    using iterator_t               = std::vector<std::shared_ptr<Option>>::iterator;
-    /// @brief Alias for a const iterator over the option list.
-    using const_iterator_t         = std::vector<std::shared_ptr<Option>>::const_iterator;
-    /// @brief Alias for a reverse iterator over the option list.
-    using reverse_iterator_t       = std::vector<std::shared_ptr<Option>>::reverse_iterator;
-    /// @brief Alias for a const reverse iterator over the option list.
-    using const_reverse_iterator_t = std::vector<std::shared_ptr<Option>>::const_reverse_iterator;
+    using option_list_t = std::vector<std::shared_ptr<Option>>;
 
     /// @brief Constructs an empty `OptionList`.
     OptionList() = default;
@@ -65,105 +57,30 @@ public:
     /// @brief Copy constructor.
     /// @param other The `OptionList` to copy.
     /// @details Creates deep copies of the options in the list.
-    OptionList(const OptionList &other)
-        : longest_short_option(other.longest_short_option)
-        , longest_long_option(other.longest_long_option)
-        , longest_value(other.longest_value)
-    {
-        if (this != &other) {
-            for (const auto &option : other.options) {
-                if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
-                    options.emplace_back(std::make_shared<ValueOption>(*vopt));
-                } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
-                    options.emplace_back(std::make_shared<ToggleOption>(*topt));
-                } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
-                    options.emplace_back(std::make_shared<MultiOption>(*mopt));
-                } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
-                    options.emplace_back(std::make_shared<PositionalOption>(*popt));
-                }
-            }
-        }
-    }
+    OptionList(const OptionList &other) = delete;
 
     /// @brief Move constructor.
     /// @param other The `OptionList` to move.
-    OptionList(OptionList &&other) noexcept
-        : options(std::move(other.options))
-        , longest_short_option(other.longest_short_option)
-        , longest_long_option(other.longest_long_option)
-        , longest_value(other.longest_value)
-    {
-        other.longest_short_option = 0;
-        other.longest_long_option  = 0;
-        other.longest_value        = 0;
-    }
+    OptionList(OptionList &&other) noexcept = default;
 
     /// @brief Copy assignment operator.
     /// @param other The `OptionList` to copy.
     /// @return A reference to this `OptionList`.
-    auto operator=(const OptionList &other) -> OptionList &
-    {
-        if (this != &other) {
-            longest_short_option = other.longest_short_option;
-            longest_long_option  = other.longest_long_option;
-            longest_value        = other.longest_value;
-            options.clear();
-            for (const auto &option : other.options) {
-                if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
-                    options.emplace_back(std::make_shared<ValueOption>(*vopt));
-                } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
-                    options.emplace_back(std::make_shared<ToggleOption>(*topt));
-                } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
-                    options.emplace_back(std::make_shared<MultiOption>(*mopt));
-                } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
-                    options.emplace_back(std::make_shared<PositionalOption>(*popt));
-                }
-            }
-        }
-        return *this;
-    }
+    auto operator=(const OptionList &other) -> OptionList & = delete;
 
     /// @brief Move assignment operator.
     /// @param other The `OptionList` to move.
     /// @return A reference to this `OptionList`.
-    auto operator=(OptionList &&other) noexcept -> OptionList &
-    {
-        if (this != &other) {
-            options                    = std::move(other.options);
-            longest_short_option       = other.longest_short_option;
-            longest_long_option        = other.longest_long_option;
-            longest_value              = other.longest_value;
-            other.longest_short_option = 0;
-            other.longest_long_option  = 0;
-            other.longest_value        = 0;
-        }
-        return *this;
-    }
+    auto operator=(OptionList &&other) noexcept -> OptionList & = default;
 
     /// @brief Destructor.
     /// @details Cleans up all dynamically allocated options.
     ~OptionList() = default;
 
-    /// @brief Finds an option by its short or long name.
-    /// @param option_string The short or long name of the option.
-    /// @return A pointer to the `Option` if found, or `nullptr` otherwise.
-    auto findOption(const std::string &option_string) const -> std::shared_ptr<Option>
-    {
-        for (const auto &option : options) {
-            if ((option->opt_short == option_string) || (option->opt_long == option_string)) {
-                return option;
-            }
-        }
-        return nullptr;
-    }
-
     /// @brief Checks if an option exists by its name.
     /// @param option_string The short or long name of the option.
     /// @return True if the option exists, false otherwise.
-    auto optionExists(const std::string &option_string) const -> bool
-    {
-        return this->findOption(option_string) != nullptr;
-    }
+    auto optionExists(const std::string &option_string) const -> bool { return this->find(option_string) != nullptr; }
 
     /// @brief Retrieves the value of an option.
     /// @tparam T The expected type of the option value.
@@ -172,7 +89,7 @@ public:
     template <typename T>
     auto getOption(const std::string &option_string) const -> T
     {
-        const std::shared_ptr<Option> option = this->findOption(option_string);
+        const std::shared_ptr<Option> option = this->find(option_string);
         if (option) {
             std::stringstream ss;
             if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
@@ -218,22 +135,6 @@ public:
         longest_value        = std::max(option->get_value_length(), longest_value);
     }
 
-    /// @brief Returns a const iterator to the beginning of the list.
-    /// @return A const iterator to the beginning of the list.
-    auto begin() const -> const_iterator_t { return options.begin(); }
-
-    /// @brief Returns a const iterator to the end of the list.
-    /// @return A const iterator to the end of the list.
-    auto end() const -> const_iterator_t { return options.end(); }
-
-    /// @brief Returns a const reverse iterator to the beginning of the list.
-    /// @return A const reverse iterator to the beginning of the list.
-    auto rbegin() const -> const_reverse_iterator_t { return options.rbegin(); }
-
-    /// @brief Returns a const reverse iterator to the end of the list.
-    /// @return A const reverse iterator to the end of the list.
-    auto rend() const -> const_reverse_iterator_t { return options.rend(); }
-
     /// @brief Retrieves the length of the longest short option name.
     /// @tparam T The type to return (default is `std::size_t`).
     /// @return The length of the longest short option name.
@@ -265,6 +166,142 @@ public:
     /// @param length The new length to consider.
     void updateLongestValue(std::size_t length) { longest_value = std::max(length, longest_value); }
 
+    /// @brief Filters options based on a provided predicate.
+    /// @tparam Predicate The type of the callable predicate.
+    /// @param predicate A callable that takes a std::shared_ptr<Option> and returns a bool.
+    /// @return A vector of options that satisfy the predicate.
+    /// @details
+    /// Here is an example of filter:
+    /// @code {cpp}
+    /// auto required_value_options = optionList.filter([](const std::shared_ptr<Option>& option) {
+    ///     auto value_option = std::dynamic_pointer_cast<ValueOption>(option);
+    ///     return value_option && value_option->required;
+    /// });
+    /// @endcode
+    template <typename Predicate>
+    auto filter(Predicate predicate) const -> option_list_t
+    {
+        option_list_t result;
+        for (const auto &option : options) {
+            if (predicate(option)) {
+                result.push_back(option);
+            }
+        }
+        return result;
+    }
+
+    /// @brief Checks if there are no options.
+    /// @return True if there are no options, false otherwise.
+    auto empty() const -> bool { return options.empty(); }
+
+    /// @brief Returns the number of options in the option list.
+    /// @return The total count of options.
+    auto size() const -> std::size_t { return options.size(); }
+
+    /// @brief Removes all options from the option list.
+    void clear() { options.clear(); }
+
+    /// @brief Finds an option by its short or long name.
+    /// @param option The short or long name of the option.
+    /// @return A pointer to the `Option` if found, or `nullptr` otherwise.
+    auto find(const std::string &option) const -> std::shared_ptr<Option>
+    {
+        for (const auto &entry : options) {
+            if ((entry->opt_short == option) || (entry->opt_long == option)) {
+                return entry;
+            }
+        }
+        return nullptr;
+    }
+
+    /// @brief Provides non-const access to the option at the specified index.
+    /// @param index The index of the option to access.
+    /// @return Reference to the option at the specified index.
+    /// @note No bounds checking is performed. Use at() for bounds-checked access.
+    auto operator[](std::size_t index) -> std::shared_ptr<Option> { return options[index]; }
+
+    /// @brief Provides const access to the token at the specified index.
+    /// @param index The index of the token to access.
+    /// @return Const reference to the token at the specified index.
+    /// @note No bounds checking is performed. Use at() for bounds-checked access.
+    auto operator[](std::size_t index) const -> const std::shared_ptr<Option> & { return options[index]; }
+
+    /// @brief Provides bounds-checked access to a token at a specific index.
+    /// @param index The index of the token.
+    /// @return Reference to the token at the specified index.
+    /// @throws std::out_of_range if the index is out of bounds.
+    auto at(std::size_t index) -> std::shared_ptr<Option> { return options.at(index); }
+
+    /// @brief Provides const bounds-checked access to a token at a specific index.
+    /// @param index The index of the token.
+    /// @return Const reference to the token at the specified index.
+    /// @throws std::out_of_range if the index is out of bounds.
+    auto at(std::size_t index) const -> const std::shared_ptr<Option> & { return options.at(index); }
+
+    /// @brief Returns a reference to the first token.
+    /// @return Reference to the first token.
+    auto front() -> std::shared_ptr<Option> { return options.front(); }
+
+    /// @brief Returns a const reference to the first token.
+    /// @return Const reference to the first token.
+    auto front() const -> const std::shared_ptr<Option> & { return options.front(); }
+
+    /// @brief Returns a reference to the last token.
+    /// @return Reference to the last token.
+    auto back() -> std::shared_ptr<Option> { return options.back(); }
+
+    /// @brief Returns a const reference to the last token.
+    /// @return Const reference to the last token.
+    auto back() const -> const std::shared_ptr<Option> & { return options.back(); }
+
+    /// @brief Returns an iterator to the beginning of the options.
+    /// @return Iterator to the first element.
+    auto begin() -> option_list_t::iterator { return options.begin(); }
+
+    /// @brief Returns an iterator to the end of the options.
+    /// @return Iterator to one past the last element.
+    auto end() -> option_list_t::iterator { return options.end(); }
+
+    /// @brief Returns a reverse iterator to the beginning (last element) of the options.
+    /// @return Reverse iterator to the last element.
+    auto rbegin() -> option_list_t::reverse_iterator { return options.rbegin(); }
+
+    /// @brief Returns a reverse iterator to the end (before first element) of the options.
+    /// @return Reverse iterator to one before the first element.
+    auto rend() -> option_list_t::reverse_iterator { return options.rend(); }
+
+    /// @brief Returns a const iterator to the beginning of the options.
+    /// @return Const iterator to the first element.
+    auto begin() const -> option_list_t::const_iterator { return options.begin(); }
+
+    /// @brief Returns a const iterator to the end of the options.
+    /// @return Const iterator to one past the last element.
+    auto end() const -> option_list_t::const_iterator { return options.end(); }
+
+    /// @brief Returns a const reverse iterator to the beginning (last element) of the options.
+    /// @return Const reverse iterator to the last element.
+    auto rbegin() const -> option_list_t::const_reverse_iterator { return options.rbegin(); }
+
+    /// @brief Returns a const reverse iterator to the end (before first element) of the options.
+    /// @return Const reverse iterator to one before the first element.
+    auto rend() const -> option_list_t::const_reverse_iterator { return options.rend(); }
+
+    /// @brief Returns a const iterator to the beginning of the options (for const-qualified objects).
+    /// @return Const iterator to the first element.
+    auto cbegin() const -> option_list_t::const_iterator { return options.cbegin(); }
+
+    /// @brief Returns a const iterator to the end of the options (for const-qualified objects).
+    /// @return Const iterator to one past the last element.
+    auto cend() const -> option_list_t::const_iterator { return options.cend(); }
+
+    /// @brief Returns a const reverse iterator to the beginning of the options (for const-qualified objects).
+    /// @return Const reverse iterator to the last element.
+    auto crbegin() const -> option_list_t::const_reverse_iterator { return options.crbegin(); }
+
+    /// @brief Returns a const reverse iterator to the end of the options (for const-qualified objects).
+    /// @return Const reverse iterator to one before the first element.
+    auto crend() const -> option_list_t::const_reverse_iterator { return options.crend(); }
+
 private:
     /// @brief The list of options.
     option_list_t options;
@@ -283,7 +320,7 @@ private:
 template <>
 auto OptionList::getOption(const std::string &option_string) const -> std::vector<std::string>
 {
-    const std::shared_ptr<Option> option = this->findOption(option_string);
+    const std::shared_ptr<Option> option = this->find(option_string);
     if (option != nullptr) {
         if (auto plopt = std::dynamic_pointer_cast<PositionalList>(option)) {
             return plopt->values;
@@ -298,7 +335,7 @@ auto OptionList::getOption(const std::string &option_string) const -> std::vecto
 template <>
 auto OptionList::getOption(const std::string &option_string) const -> std::string
 {
-    const std::shared_ptr<Option> option = this->findOption(option_string);
+    const std::shared_ptr<Option> option = this->find(option_string);
     if (option != nullptr) {
         if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
             return vopt->value;
