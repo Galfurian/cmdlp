@@ -68,7 +68,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#command-line-parsing-library-cmdlp" class="md-skip">
+        <a href="#command-line-parsing-library" class="md-skip">
           Skip to content
         </a>
       
@@ -587,7 +587,7 @@
   
 
 
-<h1 id="command-line-parsing-library-cmdlp">Command-Line Parsing Library (<code>cmdlp</code>)</h1>
+<h1 id="command-line-parsing-library">Command-Line Parsing Library</h1>
 <p><a href="https://github.com/Galfurian/cmdlp/actions/workflows/ubuntu.yml"><img alt="Ubuntu" src="https://github.com/Galfurian/cmdlp/actions/workflows/ubuntu.yml/badge.svg" /></a>
 <a href="https://github.com/Galfurian/cmdlp/actions/workflows/windows.yml"><img alt="Windows" src="https://github.com/Galfurian/cmdlp/actions/workflows/windows.yml/badge.svg" /></a>
 <a href="https://github.com/Galfurian/cmdlp/actions/workflows/macos.yml"><img alt="MacOS" src="https://github.com/Galfurian/cmdlp/actions/workflows/macos.yml/badge.svg" /></a>
@@ -609,164 +609,164 @@
 <h2 id="installation">Installation</h2>
 <p>Include the entire <code>cmdlp</code> which you can find in <code>include</code>.</p>
 <p>Then, include the necessary headers in your project:</p>
-<pre><code class="language-cpp">#include &quot;cmdlp/parser.hpp&quot;
-</code></pre>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cmdlp/parser.hpp&quot;</span>
+</span></code></pre></div>
 <h2 id="usage">Usage</h2>
 <h3 id="defining-and-parsing-command-line-options">Defining and Parsing Command-Line Options</h3>
 <p>Here is an example of how to define and parse command-line options using <code>cmdlp</code>:</p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-#include &quot;cmdlp/parser.hpp&quot;
-
-int main(int argc, char *argv[]) {
-    cmdlp::Parser parser(argc, argv);
-
-    // Define options
-    parser.addOption(&quot;-db&quot;, &quot;--double&quot;, &quot;Double value&quot;, false, 0.2);
-    parser.addOption(&quot;-i&quot;, &quot;--int&quot;, &quot;An integer value&quot;, false, -1);
-    parser.addToggle(&quot;-h&quot;, &quot;--help&quot;, &quot;Shows help for the program.&quot;, false);
-
-    // Parse options
-    parser.parseOptions();
-
-    // Retrieve and display parsed options
-    std::cout &lt;&lt; &quot;Double value  : &quot; &lt;&lt; parser.getOption&lt;double&gt;(&quot;--double&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;Integer value : &quot; &lt;&lt; parser.getOption&lt;int&gt;(&quot;--int&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;Help          : &quot; &lt;&lt; parser.getOption&lt;bool&gt;(&quot;--help&quot;) &lt;&lt; &quot;\n&quot;;
-
-    return 0;
-}
-</code></pre>
+<div class="language-C++ highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+</span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cmdlp/parser.hpp&quot;</span>
+</span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>
+</span><span id="__span-1-4"><a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-1-5"><a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="w">    </span><span class="n">cmdlp</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-1-6"><a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a>
+</span><span id="__span-1-7"><a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="w">    </span><span class="c1">// Define options</span>
+</span><span id="__span-1-8"><a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addOption</span><span class="p">(</span><span class="s">&quot;-db&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--double&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Double value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">);</span>
+</span><span id="__span-1-9"><a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addOption</span><span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--int&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;An integer value&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">);</span>
+</span><span id="__span-1-10"><a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addToggle</span><span class="p">(</span><span class="s">&quot;-h&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--help&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Shows help for the program.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-1-11"><a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a>
+</span><span id="__span-1-12"><a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="w">    </span><span class="c1">// Parse options</span>
+</span><span id="__span-1-13"><a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">parseOptions</span><span class="p">();</span>
+</span><span id="__span-1-14"><a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a>
+</span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">    </span><span class="c1">// Retrieve and display parsed options</span>
+</span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Double value  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--double&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-1-17"><a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Integer value : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--int&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-1-18"><a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Help          : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--help&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-1-19"><a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>
+</span><span id="__span-1-20"><a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-1-21"><a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="p">}</span>
+</span></code></pre></div>
 <p>Running the above program with the following options:</p>
-<pre><code class="language-bash">./example --double 3.14 --int 42 --help
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>./example<span class="w"> </span>--double<span class="w"> </span><span class="m">3</span>.14<span class="w"> </span>--int<span class="w"> </span><span class="m">42</span><span class="w"> </span>--help
+</span></code></pre></div>
 <p>Produces:</p>
-<pre><code class="language-bash">Double value  : 3.14
-Integer value : 42
-Help          : 1
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-3-1"><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>Double<span class="w"> </span>value<span class="w">  </span>:<span class="w"> </span><span class="m">3</span>.14
+</span><span id="__span-3-2"><a id="__codelineno-3-2" name="__codelineno-3-2" href="#__codelineno-3-2"></a>Integer<span class="w"> </span>value<span class="w"> </span>:<span class="w"> </span><span class="m">42</span>
+</span><span id="__span-3-3"><a id="__codelineno-3-3" name="__codelineno-3-3" href="#__codelineno-3-3"></a>Help<span class="w">          </span>:<span class="w"> </span><span class="m">1</span>
+</span></code></pre></div>
 <h2 id="defining-and-parsing-positional-arguments">Defining and Parsing Positional Arguments</h2>
 <p>Positional options are unflagged inputs identified by their position in the
 command-line input. Here is an example demonstrating how to define and parse
 positional options:</p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-#include &quot;cmdlp/parser.hpp&quot;
-
-int main(int argc, char *argv[]) {
-    cmdlp::Parser parser(argc, argv);
-
-    // Required positional option.
-    parser.addPositionalOption(&quot;-in&quot;, &quot;--input&quot;, &quot;Input file.&quot;, true);
-    // Optional positional option.
-    parser.addPositionalOption(&quot;-out&quot;, &quot;--output&quot;, &quot;Output file.&quot;, false);
-
-    // Parse options.
-    parser.parseOptions();
-
-    // Retrieve and display positional options.
-    std::cout &lt;&lt; &quot; Input  (-in)  : &quot; &lt;&lt; parser.getOption&lt;std::string&gt;(&quot;--input&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot; Output (-out) : &quot; &lt;&lt; parser.getOption&lt;std::string&gt;(&quot;--output&quot;) &lt;&lt; &quot;\n&quot;;
-
-    return 0;
-}
-</code></pre>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-4-1"><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+</span><span id="__span-4-2"><a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cmdlp/parser.hpp&quot;</span>
+</span><span id="__span-4-3"><a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a>
+</span><span id="__span-4-4"><a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-4-5"><a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a><span class="w">    </span><span class="n">cmdlp</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-4-6"><a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a>
+</span><span id="__span-4-7"><a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="w">    </span><span class="c1">// Required positional option.</span>
+</span><span id="__span-4-8"><a id="__codelineno-4-8" name="__codelineno-4-8" href="#__codelineno-4-8"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addPositionalOption</span><span class="p">(</span><span class="s">&quot;-in&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--input&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Input file.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</span><span id="__span-4-9"><a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="w">    </span><span class="c1">// Optional positional option.</span>
+</span><span id="__span-4-10"><a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addPositionalOption</span><span class="p">(</span><span class="s">&quot;-out&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--output&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Output file.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-4-11"><a id="__codelineno-4-11" name="__codelineno-4-11" href="#__codelineno-4-11"></a>
+</span><span id="__span-4-12"><a id="__codelineno-4-12" name="__codelineno-4-12" href="#__codelineno-4-12"></a><span class="w">    </span><span class="c1">// Parse options.</span>
+</span><span id="__span-4-13"><a id="__codelineno-4-13" name="__codelineno-4-13" href="#__codelineno-4-13"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">parseOptions</span><span class="p">();</span>
+</span><span id="__span-4-14"><a id="__codelineno-4-14" name="__codelineno-4-14" href="#__codelineno-4-14"></a>
+</span><span id="__span-4-15"><a id="__codelineno-4-15" name="__codelineno-4-15" href="#__codelineno-4-15"></a><span class="w">    </span><span class="c1">// Retrieve and display positional options.</span>
+</span><span id="__span-4-16"><a id="__codelineno-4-16" name="__codelineno-4-16" href="#__codelineno-4-16"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Input  (-in)  : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--input&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-4-17"><a id="__codelineno-4-17" name="__codelineno-4-17" href="#__codelineno-4-17"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Output (-out) : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--output&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-4-18"><a id="__codelineno-4-18" name="__codelineno-4-18" href="#__codelineno-4-18"></a>
+</span><span id="__span-4-19"><a id="__codelineno-4-19" name="__codelineno-4-19" href="#__codelineno-4-19"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-4-20"><a id="__codelineno-4-20" name="__codelineno-4-20" href="#__codelineno-4-20"></a><span class="p">}</span>
+</span></code></pre></div>
 <p>So if you provide.</p>
-<pre><code class="language-bash">\$ ./example in.txt
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-5-1"><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="se">\$</span><span class="w"> </span>./example<span class="w"> </span><span class="k">in</span>.txt
+</span></code></pre></div>
 <p>Produces:</p>
-<pre><code class="language-bash"> Input  (-i) : in.txt
- Output (-o) : 
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-6-1"><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="w"> </span>Input<span class="w">  </span><span class="o">(</span>-i<span class="o">)</span><span class="w"> </span>:<span class="w"> </span><span class="k">in</span>.txt
+</span><span id="__span-6-2"><a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a><span class="w"> </span>Output<span class="w"> </span><span class="o">(</span>-o<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>
+</span></code></pre></div>
 <h2 id="defining-and-parsing-a-positional-list">Defining and Parsing a Positional List</h2>
 <p>Positional lists are unflagged inputs placed at the end of the command-line
 input. Here is an example demonstrating how to define and parse positional
 lists:</p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-#include &quot;cmdlp/parser.hpp&quot;
-
-int main(int argc, char *argv[]) {
-    cmdlp::Parser parser(argc, argv);
-
-    // Positional options.
-    parser.addPositionalOption(&quot;-i&quot;, &quot;--input&quot;, &quot;Input file.&quot;, true);
-    parser.addPositionalOption(&quot;-o&quot;, &quot;--output&quot;, &quot;Output file.&quot;, true);
-    // Positional list.
-    parser.addPositionalList(&quot;-f&quot;, &quot;--files&quot;, &quot;List of extra files.&quot;, false);
-
-    // Parse options.
-    parser.parseOptions();
-
-    // Retrieve and display positional options.
-    std::cout &lt;&lt; &quot; Input  (-i) : &quot; &lt;&lt; parser.getOption&lt;std::string&gt;(&quot;--input&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot; Output (-o) : &quot; &lt;&lt; parser.getOption&lt;std::string&gt;(&quot;--output&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot; Extra  (-f) : &quot;;
-    for (const auto &amp;file : parser.getOption&lt;cmdlp::Values&gt;(&quot;--files&quot;)) {
-        std::cout &lt;&lt; file &lt;&lt; &quot; &quot;;
-    }
-    std::cout &lt;&lt; &quot;\n&quot;;
-
-    return 0;
-}
-</code></pre>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-7-1"><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+</span><span id="__span-7-2"><a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cmdlp/parser.hpp&quot;</span>
+</span><span id="__span-7-3"><a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a>
+</span><span id="__span-7-4"><a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-5"><a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">    </span><span class="n">cmdlp</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-7-6"><a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>
+</span><span id="__span-7-7"><a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">    </span><span class="c1">// Positional options.</span>
+</span><span id="__span-7-8"><a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addPositionalOption</span><span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--input&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Input file.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</span><span id="__span-7-9"><a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addPositionalOption</span><span class="p">(</span><span class="s">&quot;-o&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--output&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Output file.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">true</span><span class="p">);</span>
+</span><span id="__span-7-10"><a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">    </span><span class="c1">// Positional list.</span>
+</span><span id="__span-7-11"><a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addPositionalList</span><span class="p">(</span><span class="s">&quot;-f&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--files&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;List of extra files.&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-7-12"><a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a>
+</span><span id="__span-7-13"><a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">    </span><span class="c1">// Parse options.</span>
+</span><span id="__span-7-14"><a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">parseOptions</span><span class="p">();</span>
+</span><span id="__span-7-15"><a id="__codelineno-7-15" name="__codelineno-7-15" href="#__codelineno-7-15"></a>
+</span><span id="__span-7-16"><a id="__codelineno-7-16" name="__codelineno-7-16" href="#__codelineno-7-16"></a><span class="w">    </span><span class="c1">// Retrieve and display positional options.</span>
+</span><span id="__span-7-17"><a id="__codelineno-7-17" name="__codelineno-7-17" href="#__codelineno-7-17"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Input  (-i) : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--input&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-7-18"><a id="__codelineno-7-18" name="__codelineno-7-18" href="#__codelineno-7-18"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Output (-o) : &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--output&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-7-19"><a id="__codelineno-7-19" name="__codelineno-7-19" href="#__codelineno-7-19"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; Extra  (-f) : &quot;</span><span class="p">;</span>
+</span><span id="__span-7-20"><a id="__codelineno-7-20" name="__codelineno-7-20" href="#__codelineno-7-20"></a><span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="k">auto</span><span class="w"> </span><span class="o">&amp;</span><span class="n">file</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">cmdlp</span><span class="o">::</span><span class="n">Values</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--files&quot;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-7-21"><a id="__codelineno-7-21" name="__codelineno-7-21" href="#__codelineno-7-21"></a><span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">file</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot; &quot;</span><span class="p">;</span>
+</span><span id="__span-7-22"><a id="__codelineno-7-22" name="__codelineno-7-22" href="#__codelineno-7-22"></a><span class="w">    </span><span class="p">}</span>
+</span><span id="__span-7-23"><a id="__codelineno-7-23" name="__codelineno-7-23" href="#__codelineno-7-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-7-24"><a id="__codelineno-7-24" name="__codelineno-7-24" href="#__codelineno-7-24"></a>
+</span><span id="__span-7-25"><a id="__codelineno-7-25" name="__codelineno-7-25" href="#__codelineno-7-25"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-7-26"><a id="__codelineno-7-26" name="__codelineno-7-26" href="#__codelineno-7-26"></a><span class="p">}</span>
+</span></code></pre></div>
 <p>So if you provide.</p>
-<pre><code class="language-bash">\$ ./example in.txt out.txt a.txt b.txt c.txt
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-8-1"><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="se">\$</span><span class="w"> </span>./example<span class="w"> </span><span class="k">in</span>.txt<span class="w"> </span>out.txt<span class="w"> </span>a.txt<span class="w"> </span>b.txt<span class="w"> </span>c.txt
+</span></code></pre></div>
 <p>Produces:</p>
-<pre><code class="language-bash"> Input  (-i) : in.txt
- Output (-o) : out.txt
- Extra  (-f) : a.txt b.txt c.txt
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-9-1"><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="w"> </span>Input<span class="w">  </span><span class="o">(</span>-i<span class="o">)</span><span class="w"> </span>:<span class="w"> </span><span class="k">in</span>.txt
+</span><span id="__span-9-2"><a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="w"> </span>Output<span class="w"> </span><span class="o">(</span>-o<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>out.txt
+</span><span id="__span-9-3"><a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w"> </span>Extra<span class="w">  </span><span class="o">(</span>-f<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>a.txt<span class="w"> </span>b.txt<span class="w"> </span>c.txt
+</span></code></pre></div>
 <h2 id="example">Example</h2>
 <p>Here is a more comprehensive example demonstrating various features of <code>cmdlp</code>:</p>
-<pre><code class="language-cpp">#include &lt;iostream&gt;
-#include &quot;cmdlp/parser.hpp&quot;
-
-int main(int argc, char *argv[]) {
-    cmdlp::Parser parser(argc, argv);
-
-    parser.addSeparator(&quot;General Options:&quot;);
-    parser.addOption(&quot;-db&quot;, &quot;--double&quot;, &quot;Double value&quot;, 0.5, false);
-    parser.addOption(&quot;-i&quot;, &quot;--int&quot;, &quot;Integer value&quot;, -1, false);
-
-    parser.addSeparator(&quot;Toggle Options:&quot;);
-    parser.addToggle(&quot;-v&quot;, &quot;--verbose&quot;, &quot;Enable verbose mode&quot;, false);
-
-    parser.addSeparator(&quot;Multi-value Options:&quot;);
-    parser.addMultiOption(&quot;-m&quot;, &quot;--mode&quot;, &quot;Operation mode&quot;, {&quot;auto&quot;, &quot;manual&quot;}, &quot;auto&quot;);
-
-    parser.parseOptions();
-
-    std::cout &lt;&lt; &quot;Help: \n&quot; &lt;&lt; parser.getHelp() &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;Parsed Options: \n&quot;;
-    std::cout &lt;&lt; &quot;  Double: &quot; &lt;&lt; parser.getOption&lt;double&gt;(&quot;--double&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;  Integer: &quot; &lt;&lt; parser.getOption&lt;int&gt;(&quot;--int&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;  Verbose: &quot; &lt;&lt; parser.getOption&lt;bool&gt;(&quot;--verbose&quot;) &lt;&lt; &quot;\n&quot;;
-    std::cout &lt;&lt; &quot;  Mode: &quot; &lt;&lt; parser.getOption&lt;std::string&gt;(&quot;--mode&quot;) &lt;&lt; &quot;\n&quot;;
-
-    return 0;
-}
-</code></pre>
+<div class="language-cpp highlight"><pre><span></span><code><span id="__span-10-1"><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;iostream&gt;</span>
+</span><span id="__span-10-2"><a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;cmdlp/parser.hpp&quot;</span>
+</span><span id="__span-10-3"><a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a>
+</span><span id="__span-10-4"><a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="kt">int</span><span class="w"> </span><span class="nf">main</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="kt">char</span><span class="w"> </span><span class="o">*</span><span class="n">argv</span><span class="p">[])</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-10-5"><a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">    </span><span class="n">cmdlp</span><span class="o">::</span><span class="n">Parser</span><span class="w"> </span><span class="n">parser</span><span class="p">(</span><span class="n">argc</span><span class="p">,</span><span class="w"> </span><span class="n">argv</span><span class="p">);</span>
+</span><span id="__span-10-6"><a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a>
+</span><span id="__span-10-7"><a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addSeparator</span><span class="p">(</span><span class="s">&quot;General Options:&quot;</span><span class="p">);</span>
+</span><span id="__span-10-8"><a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addOption</span><span class="p">(</span><span class="s">&quot;-db&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--double&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Double value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-10-9"><a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addOption</span><span class="p">(</span><span class="s">&quot;-i&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--int&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Integer value&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-10-10"><a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a>
+</span><span id="__span-10-11"><a id="__codelineno-10-11" name="__codelineno-10-11" href="#__codelineno-10-11"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addSeparator</span><span class="p">(</span><span class="s">&quot;Toggle Options:&quot;</span><span class="p">);</span>
+</span><span id="__span-10-12"><a id="__codelineno-10-12" name="__codelineno-10-12" href="#__codelineno-10-12"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addToggle</span><span class="p">(</span><span class="s">&quot;-v&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--verbose&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Enable verbose mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="nb">false</span><span class="p">);</span>
+</span><span id="__span-10-13"><a id="__codelineno-10-13" name="__codelineno-10-13" href="#__codelineno-10-13"></a>
+</span><span id="__span-10-14"><a id="__codelineno-10-14" name="__codelineno-10-14" href="#__codelineno-10-14"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addSeparator</span><span class="p">(</span><span class="s">&quot;Multi-value Options:&quot;</span><span class="p">);</span>
+</span><span id="__span-10-15"><a id="__codelineno-10-15" name="__codelineno-10-15" href="#__codelineno-10-15"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">addMultiOption</span><span class="p">(</span><span class="s">&quot;-m&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;--mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;Operation mode&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;auto&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;manual&quot;</span><span class="p">},</span><span class="w"> </span><span class="s">&quot;auto&quot;</span><span class="p">);</span>
+</span><span id="__span-10-16"><a id="__codelineno-10-16" name="__codelineno-10-16" href="#__codelineno-10-16"></a>
+</span><span id="__span-10-17"><a id="__codelineno-10-17" name="__codelineno-10-17" href="#__codelineno-10-17"></a><span class="w">    </span><span class="n">parser</span><span class="p">.</span><span class="n">parseOptions</span><span class="p">();</span>
+</span><span id="__span-10-18"><a id="__codelineno-10-18" name="__codelineno-10-18" href="#__codelineno-10-18"></a>
+</span><span id="__span-10-19"><a id="__codelineno-10-19" name="__codelineno-10-19" href="#__codelineno-10-19"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Help: </span><span class="se">\n</span><span class="s">&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getHelp</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-20"><a id="__codelineno-10-20" name="__codelineno-10-20" href="#__codelineno-10-20"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Parsed Options: </span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-21"><a id="__codelineno-10-21" name="__codelineno-10-21" href="#__codelineno-10-21"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Double: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--double&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-22"><a id="__codelineno-10-22" name="__codelineno-10-22" href="#__codelineno-10-22"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Integer: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--int&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-23"><a id="__codelineno-10-23" name="__codelineno-10-23" href="#__codelineno-10-23"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Verbose: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--verbose&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-24"><a id="__codelineno-10-24" name="__codelineno-10-24" href="#__codelineno-10-24"></a><span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;  Mode: &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">parser</span><span class="p">.</span><span class="n">getOption</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;--mode&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">;</span>
+</span><span id="__span-10-25"><a id="__codelineno-10-25" name="__codelineno-10-25" href="#__codelineno-10-25"></a>
+</span><span id="__span-10-26"><a id="__codelineno-10-26" name="__codelineno-10-26" href="#__codelineno-10-26"></a><span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+</span><span id="__span-10-27"><a id="__codelineno-10-27" name="__codelineno-10-27" href="#__codelineno-10-27"></a><span class="p">}</span>
+</span></code></pre></div>
 <p>Running with:</p>
-<pre><code class="language-bash">./example --double 3.14 --int 42 --verbose --mode manual
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-11-1"><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>./example<span class="w"> </span>--double<span class="w"> </span><span class="m">3</span>.14<span class="w"> </span>--int<span class="w"> </span><span class="m">42</span><span class="w"> </span>--verbose<span class="w"> </span>--mode<span class="w"> </span>manual
+</span></code></pre></div>
 <p>Produces:</p>
-<pre><code class="language-bash">Help: 
-
-General Options:
-[-db] --double  (   0.5) : Double value
-[-i ] --int     (    -1) : Integer value
-
-Toggle Options:
-[-v ] --verbose ( false) : Enable verbose mode
-
-Multi-value Options:
-[-m ] --mode    (  auto) : Operation mode [auto, manual]
-
-Parsed Options: 
-  Double: 0.5
-  Integer: -1
-  Verbose: 0
-  Mode: auto
-</code></pre>
+<div class="language-bash highlight"><pre><span></span><code><span id="__span-12-1"><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>Help:<span class="w"> </span>
+</span><span id="__span-12-2"><a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a>
+</span><span id="__span-12-3"><a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a>General<span class="w"> </span>Options:
+</span><span id="__span-12-4"><a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="o">[</span>-db<span class="o">]</span><span class="w"> </span>--double<span class="w">  </span><span class="o">(</span><span class="w">   </span><span class="m">0</span>.5<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>Double<span class="w"> </span>value
+</span><span id="__span-12-5"><a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="o">[</span>-i<span class="w"> </span><span class="o">]</span><span class="w"> </span>--int<span class="w">     </span><span class="o">(</span><span class="w">    </span>-1<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>Integer<span class="w"> </span>value
+</span><span id="__span-12-6"><a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a>
+</span><span id="__span-12-7"><a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a>Toggle<span class="w"> </span>Options:
+</span><span id="__span-12-8"><a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="o">[</span>-v<span class="w"> </span><span class="o">]</span><span class="w"> </span>--verbose<span class="w"> </span><span class="o">(</span><span class="w"> </span><span class="nb">false</span><span class="o">)</span><span class="w"> </span>:<span class="w"> </span>Enable<span class="w"> </span>verbose<span class="w"> </span>mode
+</span><span id="__span-12-9"><a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a>
+</span><span id="__span-12-10"><a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a>Multi-value<span class="w"> </span>Options:
+</span><span id="__span-12-11"><a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="o">[</span>-m<span class="w"> </span><span class="o">]</span><span class="w"> </span>--mode<span class="w">    </span><span class="o">(</span><span class="w">  </span>auto<span class="o">)</span><span class="w"> </span>:<span class="w"> </span>Operation<span class="w"> </span>mode<span class="w"> </span><span class="o">[</span>auto,<span class="w"> </span>manual<span class="o">]</span>
+</span><span id="__span-12-12"><a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a>
+</span><span id="__span-12-13"><a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a>Parsed<span class="w"> </span>Options:<span class="w"> </span>
+</span><span id="__span-12-14"><a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">  </span>Double:<span class="w"> </span><span class="m">0</span>.5
+</span><span id="__span-12-15"><a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">  </span>Integer:<span class="w"> </span>-1
+</span><span id="__span-12-16"><a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">  </span>Verbose:<span class="w"> </span><span class="m">0</span>
+</span><span id="__span-12-17"><a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">  </span>Mode:<span class="w"> </span>auto
+</span></code></pre></div>
 <h2 id="api-reference">API Reference</h2>
 <h3 id="key-classes">Key Classes</h3>
 <p>The class that the user is mean to rely upon:</p>
@@ -836,7 +836,7 @@ Parsed Options:
     </div>
     
     
-    <script id="__config" type="application/json">{"base": ".", "features": ["navigation.instant", "navigation.instant.prefetch"], "search": "assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": ".", "features": ["content.code.copy", "content.code.select", "content.code.annotate"], "search": "assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
       <script src="assets/javascripts/bundle.c8b220af.min.js"></script>
