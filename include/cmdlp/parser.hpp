@@ -313,11 +313,17 @@ public:
     auto getHelp() const -> std::string
     {
         std::stringstream ss;
+        // Pre-compute the maximum length of the short+long+value for all options.
+        std::size_t max_length        = options.getLongestShortOption<int>() + options.getLongestLongOption<int>() + options.getLongestValue<int>() + 4;
+        // If the max length is above 40, we need to move all options description to the next line.
+        bool description_on_next_line = max_length > 40;
+
         ss << this->getUsage() << "\n";
         for (const auto &option : options) {
             auto sepr = std::dynamic_pointer_cast<detail::Separator>(option);
             if (sepr) {
-                ss << "\n" << sepr->description << "\n";
+                ss << "\n"
+                   << sepr->description << "\n";
             } else {
                 auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option);
                 auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option);
@@ -329,26 +335,31 @@ public:
                 ssopt << " " << std::setw(options.getLongestShortOption<int>()) << std::left << option->opt_short;
                 ssopt << " " << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
                 ssopt << " " << std::setw(options.getLongestValue<int>()) << std::left;
+
+                auto description = option->description;
                 if (vopt) {
                     ssopt << ((vopt->required && vopt->value.empty()) ? "<req>" : vopt->value);
                 } else if (topt) {
                     ssopt << (topt->toggled ? "true" : "false");
                 } else if (mopt) {
                     ssopt << mopt->value;
+                    description += " [" + mopt->print_list() + "]";
                 } else if (popt) {
                     ssopt << ((popt->required && popt->value.empty()) ? "<req>" : popt->value);
                 } else if (lopt) {
                     ssopt << ((lopt->required && lopt->values.empty()) ? "<req>" : lopt->print_values());
                 }
-                ssopt << " : ";
-                if (mopt != nullptr) {
-                    ssopt << this->format_paragraph(
-                        option->description + " [" + mopt->print_list() + "]", ssopt.str().length(),
-                        ssopt.str().length(), 80);
+                std::size_t initial_offset, tabulation;
+                if (description_on_next_line) {
+                    ssopt << "\n    : ";
+                    initial_offset = 6;
+                    tabulation     = 6;
                 } else {
-                    ssopt << this->format_paragraph(
-                        option->description, ssopt.str().length(), ssopt.str().length(), 80);
+                    ssopt << " : ";
+                    initial_offset = ssopt.str().length();
+                    tabulation     = initial_offset;
                 }
+                ssopt << this->format_paragraph(description, initial_offset, tabulation, 80);
                 ssopt << "\n";
                 ss << ssopt.str();
             }
@@ -495,7 +506,8 @@ private:
             std::string word(word_start, word_end);
             // Check if adding the word would exceed the max line length.
             if (current_length + word.length() + 1 > max_line_length) {
-                formatted << "\n" << indent;
+                formatted << "\n"
+                          << indent;
                 current_length = tabulation;
             } else if (it != text.begin()) {
                 formatted << ' ';

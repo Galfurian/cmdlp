@@ -127,6 +127,10 @@ if(BUILD_EXAMPLES)
     add_executable(${PROJECT_NAME}_example_positional ${PROJECT_SOURCE_DIR}/examples/example_positional.cpp)
     target_include_directories(${PROJECT_NAME}_example_positional PUBLIC ${PROJECT_SOURCE_DIR}/include)
     target_link_libraries(${PROJECT_NAME}_example_positional ${PROJECT_NAME})
+
+    add_executable(${PROJECT_NAME}_example_help_formatting ${PROJECT_SOURCE_DIR}/examples/example_help_formatting.cpp)
+    target_include_directories(${PROJECT_NAME}_example_help_formatting PUBLIC ${PROJECT_SOURCE_DIR}/include)
+    target_link_libraries(${PROJECT_NAME}_example_help_formatting ${PROJECT_NAME})
 endif()
 
 # -----------------------------------------------------------------------------
