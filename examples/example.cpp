@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     } catch (const cmdlp::ParsingError &e) {
         std::cerr << "Error: " << e.what() << "\n";
         return 1; // Exit with error code
-    } catch (const cmdlp::detail::BadConversion &e) {
+    } catch (const cmdlp::BadConversion &e) {
         std::cerr << "Conversion Error: " << e.what() << "\n";
         return 1; // Exit with error code
     }

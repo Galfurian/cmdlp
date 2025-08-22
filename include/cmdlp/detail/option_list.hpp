@@ -15,6 +15,19 @@
 namespace cmdlp
 {
 
+/// @class BadConversion
+/// @brief Exception thrown when a value cannot be converted to the requested type.
+class BadConversion : public std::runtime_error
+{
+public:
+    /// @brief Constructs a BadConversion exception.
+    /// @param message The error message.
+    explicit BadConversion(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
 namespace detail
 {
 
@@ -41,19 +54,6 @@ public:
     /// @brief Returns the error message.
     /// @return A C-string containing the error message.
     auto what() const noexcept -> const char * override { return msg.c_str(); }
-};
-
-/// @class BadConversion
-/// @brief Exception thrown when a value cannot be converted to the requested type.
-class BadConversion : public std::runtime_error
-{
-public:
-    /// @brief Constructs a BadConversion exception.
-    /// @param message The error message.
-    explicit BadConversion(const std::string &message)
-        : std::runtime_error(message)
-    {
-    }
 };
 
 /// @class OptionList

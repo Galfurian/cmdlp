@@ -1,4 +1,3 @@
-#include "cmdlp/detail/option_list.hpp" // For BadConversion
 #include "cmdlp/parser.hpp"
 #include <iostream>
 #include <stdexcept> // For std::out_of_range
@@ -74,7 +73,7 @@ int main(int, char *[])
 
     // Test 4: BadConversion for non-boolean type
     std::cout << "--- Test: BadConversion for non-boolean type ---\n";
-    all_tests_passed &= test_exception_thrown<cmdlp::detail::BadConversion>(
+    all_tests_passed &= test_exception_thrown<cmdlp::BadConversion>(
         [] {
             std::vector<std::string> args = {"test_error_handling", "--int-val", "not_an_int"};
             cmdlp::Parser parser(args);
@@ -86,7 +85,7 @@ int main(int, char *[])
 
     // Test 5: BadConversion for boolean type (invalid string)
     std::cout << "--- Test: BadConversion for boolean type (invalid string) ---\n";
-    all_tests_passed &= test_exception_thrown<cmdlp::detail::BadConversion>(
+    all_tests_passed &= test_exception_thrown<cmdlp::BadConversion>(
         [] {
             std::vector<std::string> args = {"test_error_handling", "--bool-val", "not_a_bool"};
             cmdlp::Parser parser(args);
