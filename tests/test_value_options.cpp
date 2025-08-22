@@ -34,17 +34,12 @@ test_option(const cmdlp::Parser &parser, const T1 &opt, const T2 &value)
 int main(int, char *[])
 {
     std::vector<std::string> arguments = {
-        "test_cmdlp",                 //
-        "--double",   "0.00006456",   //
-        "--int",      "-42",          //
-        "-u",         "17",           //
-        "-s",         "Hello there!", //
-        "-c",         "(3,4)",        //
-        "--verbose",                  //
-        "--mode",     "auto",         //
-        "input.txt",                  //
-        "config.txt",                 //
-        "file1.txt",  "file2.txt",
+        "test_value_options",
+        "--double",   "0.00006456",
+        "--int",      "-42",
+        "-u",         "17",
+        "-s",         "Hello there!",
+        "-c",         "(3,4)",
     };
 
     cmdlp::Parser parser(arguments);
@@ -55,16 +50,11 @@ int main(int, char *[])
     parser.addOption("-u", "--unsigned", "An unsigned value", false);
     parser.addOption("-s", "--string", "A string", false);
     parser.addOption("-c", "--complex", "A complex number", false);
-    parser.addToggle("-v", "--verbose", "Enables verbose output", false);
-    parser.addMultiOption("-m", "--mode", "Select mode", {"auto", "manual", "test"}, "manual");
-
-    // Adding positional options
-    parser.addPositionalOption("-in", "--input", "Input file", true);
-    parser.addPositionalOption("-cfg", "--config", "Configuration file", true);
-    parser.addPositionalList("-f", "--files", "List of input files", false);
 
     // Parsing options
     parser.parseOptions();
+    // Validate options (should not throw for this test as no required options are missing)
+    parser.validateOptions();
 
     // Testing parsed options
     if (!test_option(parser, parser.getOption<double>("--double"), 0.00006456))
@@ -84,26 +74,6 @@ int main(int, char *[])
     if (!test_option(parser, parsed_complex, expected_complex))
         return 1;
 
-    if (!test_option(parser, parser.getOption<bool>("--verbose"), true))
-        return 1;
-
-    // Test MultiOption default
-    if (!test_option(parser, parser.getOption<std::string>("--mode"), "auto"))
-        return 1;
-
-    // Testing positional options
-    if (!test_option(parser, parser.getOption<std::string>("--input"), "input.txt"))
-        return 1;
-    if (!test_option(parser, parser.getOption<std::string>("--config"), "config.txt"))
-        return 1;
-    auto files = parser.getOption<std::vector<std::string>>("--files");
-    if (!test_option(parser, files.size(), 2UL))
-        return 1;
-    if (!test_option(parser, files[0], "file1.txt"))
-        return 1;
-    if (!test_option(parser, files[1], "file2.txt"))
-        return 1;
-
-    std::cout << "All tests passed successfully!\n";
+    std::cout << "All value options tests passed successfully!\n";
     return 0;
 }

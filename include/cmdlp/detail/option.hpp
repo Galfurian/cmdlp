@@ -238,7 +238,7 @@ public:
     /// @throws std::invalid_argument if the value is not in the list of allowed values.
     void setValue(const std::string &_value)
     {
-        if (!this->isValueAllowed(value)) {
+        if (!this->isValueAllowed(_value)) {
             std::ostringstream oss;
             oss << "Value \"" << _value << "\" is not in the list of allowed values: " << print_list();
             throw std::invalid_argument(oss.str());
