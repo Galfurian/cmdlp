@@ -33,7 +33,7 @@ public:
     OptionExistException(const std::shared_ptr<Option> &_new_option, const std::shared_ptr<Option> &_existing_option)
     {
         std::stringstream ss;
-        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long << ") already exists: ("
+        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long << ") already exists: (" 
            << _existing_option->opt_short << ", " << _existing_option->opt_long << ")\n";
         msg = ss.str();
     }
@@ -43,7 +43,21 @@ public:
     auto what() const noexcept -> const char * override { return msg.c_str(); }
 };
 
+/// @class BadConversion
+/// @brief Exception thrown when a value cannot be converted to the requested type.
+class BadConversion : public std::runtime_error
+{
+public:
+    /// @brief Constructs a BadConversion exception.
+    /// @param message The error message.
+    explicit BadConversion(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
 /// @class OptionList
+
 /// @brief Manages a list of command-line options.
 class OptionList
 {
@@ -92,20 +106,40 @@ public:
         const std::shared_ptr<Option> option = this->find(option_string);
         if (option) {
             std::stringstream ss;
+            std::string value_str;
             if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
-                ss << vopt->value;
+                value_str = vopt->value;
             } else if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
-                ss << topt->toggled;
+                value_str = (topt->toggled ? "true" : "false");
             } else if (auto mopt = std::dynamic_pointer_cast<MultiOption>(option)) {
-                ss << mopt->value;
+                value_str = mopt->value;
             } else if (auto popt = std::dynamic_pointer_cast<PositionalOption>(option)) {
-                ss << popt->value;
+                value_str = popt->value;
+            } else {
+                // This case should ideally not be reached if all Option types are handled
+                // or if the option_string doesn't correspond to a value-holding option.
+                // For now, return default or throw an error if no value can be extracted.
+                // Returning T() might be misleading if the option exists but has no convertible value.
+                // Throwing an exception is more explicit.
+                std::stringstream error_msg;
+                error_msg << "Option '" << option_string << "' does not hold a convertible value.";
+                throw BadConversion(error_msg.str());
             }
+
+            ss << value_str;
             T data;
             ss >> data;
+            if (ss.fail() || !ss.eof()) { // Check for conversion failure or leftover characters
+                std::stringstream error_msg;
+                error_msg << "Failed to convert value '" << value_str << "' to requested type.";
+                throw BadConversion(error_msg.str());
+            }
             return data;
         }
-        return T(0);
+        // If option not found, throw an exception instead of returning T(0)
+        std::stringstream error_msg;
+        error_msg << "Option '" << option_string << "' not found.";
+        throw std::out_of_range(error_msg.str());
     }
 
     /// @brief Adds an option to the list.
@@ -351,6 +385,41 @@ auto OptionList::getOption(const std::string &option_string) const -> std::strin
         }
     }
     return "";
+}
+
+/// @brief Specialization of `getOption` for `bool`.
+/// @param option_string The short or long name of the option.
+/// @return The value of the option as a bool.
+/// @throws BadConversion if the value is not "true" or "false".
+template <>
+auto OptionList::getOption(const std::string &option_string) const -> bool
+{
+    const std::shared_ptr<Option> option = this->find(option_string);
+    if (option != nullptr) {
+        std::string value_str;
+        if (auto topt = std::dynamic_pointer_cast<ToggleOption>(option)) {
+            value_str = (topt->toggled ? "true" : "false");
+        } else if (auto vopt = std::dynamic_pointer_cast<ValueOption>(option)) {
+            value_str = vopt->value;
+        } else {
+            std::stringstream error_msg;
+            error_msg << "Option '" << option_string << "' does not hold a convertible boolean value.";
+            throw BadConversion(error_msg.str());
+        }
+
+        if (value_str == "true") {
+            return true;
+        } else if (value_str == "false") {
+            return false;
+        } else {
+            std::stringstream error_msg;
+            error_msg << "Failed to convert value '" << value_str << "' to bool. Expected 'true' or 'false'.";
+            throw BadConversion(error_msg.str());
+        }
+    }
+    std::stringstream error_msg;
+    error_msg << "Option '" << option_string << "' not found.";
+    throw std::out_of_range(error_msg.str());
 }
 
 } // namespace detail

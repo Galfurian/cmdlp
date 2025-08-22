@@ -22,6 +22,19 @@ enum : unsigned char {
 namespace cmdlp
 {
 
+/// @class ParsingError
+/// @brief Exception thrown when a parsing error occurs.
+class ParsingError : public std::runtime_error
+{
+public:
+    /// @brief Constructs a ParsingError exception.
+    /// @param message The error message.
+    explicit ParsingError(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
+
 /// @class Parser
 /// @brief A class to define, parse, and manage command-line options.
 class Parser
@@ -326,10 +339,10 @@ private:
             value = tokenizer.getOption(option->opt_long);
             if (value.empty()) {
                 if (option->required) {
-                    std::cerr << "Cannot find required option: " << option->opt_long << " [" << option->opt_short
-                              << "]\n";
-                    std::cerr << this->getHelp() << "\n";
-                    std::exit(1); // Exit if required option is missing.
+                    std::stringstream ss;
+                    ss << "Cannot find required option: " << option->opt_long << " [" << option->opt_short << "]\n";
+                    ss << this->getHelp() << "\n";
+                    throw ParsingError(ss.str());
                 }
                 return false; // Skip optional missing options.
             }
@@ -399,9 +412,10 @@ private:
         }
         // Handle missing required positional argument
         if (option->required) {
-            std::cerr << "Missing required positional argument: " << option->description << "\n";
-            std::cerr << this->getHelp() << "\n";
-            std::exit(1);
+            std::stringstream ss;
+            ss << "Missing required positional argument: " << option->description << "\n";
+            ss << this->getHelp() << "\n";
+            throw ParsingError(ss.str());
         }
     }
 
@@ -439,9 +453,10 @@ private:
         }
         // Handle missing required positional argument
         if (option->values.empty() && option->required) {
-            std::cerr << "Missing required positional list argument: " << option->description << "\n";
-            std::cerr << this->getHelp() << "\n";
-            std::exit(1);
+            std::stringstream ss;
+            ss << "Missing required positional list argument: " << option->description << "\n";
+            ss << this->getHelp() << "\n";
+            throw ParsingError(ss.str());
         }
     }
 
