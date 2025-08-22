@@ -33,7 +33,7 @@ public:
     OptionExistException(const std::shared_ptr<Option> &_new_option, const std::shared_ptr<Option> &_existing_option)
     {
         std::stringstream ss;
-        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long << ") already exists: (" 
+        ss << "Option (" << _new_option->opt_short << ", " << _new_option->opt_long << ") already exists: ("
            << _existing_option->opt_short << ", " << _existing_option->opt_long << ")\n";
         msg = ss.str();
     }
@@ -136,7 +136,7 @@ public:
             }
             return data;
         }
-        // If option not found, throw an exception instead of returning T(0)
+        // If option not found, throw an exception.
         std::stringstream error_msg;
         error_msg << "Option '" << option_string << "' not found.";
         throw std::out_of_range(error_msg.str());
@@ -360,7 +360,10 @@ auto OptionList::getOption(const std::string &option_string) const -> std::vecto
             return plopt->values;
         }
     }
-    return std::vector<std::string>();
+    // If option not found, throw an exception.
+    std::stringstream error_msg;
+    error_msg << "Option '" << option_string << "' not found.";
+    throw std::out_of_range(error_msg.str());
 }
 
 /// @brief Specialization of `getOption` for `std::string`.
@@ -384,7 +387,10 @@ auto OptionList::getOption(const std::string &option_string) const -> std::strin
             return popt->value;
         }
     }
-    return "";
+    // If option not found, throw an exception.
+    std::stringstream error_msg;
+    error_msg << "Option '" << option_string << "' not found.";
+    throw std::out_of_range(error_msg.str());
 }
 
 /// @brief Specialization of `getOption` for `bool`.
@@ -417,6 +423,7 @@ auto OptionList::getOption(const std::string &option_string) const -> bool
             throw BadConversion(error_msg.str());
         }
     }
+    // If option not found, throw an exception.
     std::stringstream error_msg;
     error_msg << "Option '" << option_string << "' not found.";
     throw std::out_of_range(error_msg.str());

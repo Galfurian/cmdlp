@@ -138,14 +138,20 @@ if(BUILD_TESTS)
     # CMake has support for adding tests to a project.
     enable_testing()
 
-    # Add the test.
-    add_executable(${PROJECT_NAME}_test_${PROJECT_NAME} ${PROJECT_SOURCE_DIR}/tests/test_${PROJECT_NAME}.cpp)
-    # Inlcude header directories.
-    target_include_directories(${PROJECT_NAME}_test_${PROJECT_NAME} PUBLIC ${PROJECT_SOURCE_DIR}/include)
-    # Liking for the test.
-    target_link_libraries(${PROJECT_NAME}_test_${PROJECT_NAME} ${PROJECT_NAME})
-    # Add the test.
-    add_test(${PROJECT_NAME}_test_${PROJECT_NAME}_run ${PROJECT_NAME}_test_${PROJECT_NAME})
+    # Define a helper function to add tests
+    function(add_cmdlp_test test_name source_file)
+        add_executable(${PROJECT_NAME}_${test_name} ${PROJECT_SOURCE_DIR}/tests/${source_file})
+        target_include_directories(${PROJECT_NAME}_${test_name} PUBLIC ${PROJECT_SOURCE_DIR}/include)
+        target_link_libraries(${PROJECT_NAME}_${test_name} ${PROJECT_NAME})
+        add_test(${test_name}_run ${PROJECT_NAME}_${test_name})
+    endfunction()
+
+    # Add individual tests
+    add_cmdlp_test(test_value_options "test_value_options.cpp")
+    add_cmdlp_test(test_toggle_options "test_toggle_options.cpp")
+    add_cmdlp_test(test_multi_options "test_multi_options.cpp")
+    add_cmdlp_test(test_positional_options "test_positional_options.cpp")
+    add_cmdlp_test(test_error_handling "test_error_handling.cpp")
 
 endif()
 
