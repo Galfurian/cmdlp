@@ -217,6 +217,34 @@ public:
         return options.getOption<T>(opt);
     }
 
+    /// @brief Validates the parsed options, ensuring all required options are present.
+    /// @details This method should be called after parseOptions() to perform validation.
+    /// It will throw a ParsingError if any required options are missing.
+    void validateOptions() const
+    {
+        for (const auto &option : options) {
+            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
+                if (vopt->required && vopt->value.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required option: " << vopt->opt_long << " [" << vopt->opt_short << "]";
+                    throw ParsingError(ss.str());
+                }
+            } else if (auto popt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
+                if (popt->required && popt->value.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required positional argument: " << popt->description;
+                    throw ParsingError(ss.str());
+                }
+            } else if (auto plopt = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
+                if (plopt->required && plopt->values.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required positional list argument: " << plopt->description;
+                    throw ParsingError(ss.str());
+                }
+            }
+        }
+    }
+
     /// @brief Parses the registered options from the command-line arguments.
     /// @details Reads the command-line arguments and assigns values to the corresponding options.
     /// If a required option is missing, the program will print an error and exit.
@@ -338,12 +366,6 @@ private:
         if (value.empty()) {
             value = tokenizer.getOption(option->opt_long);
             if (value.empty()) {
-                if (option->required) {
-                    std::stringstream ss;
-                    ss << "Cannot find required option: " << option->opt_long << " [" << option->opt_short << "]\n";
-                    ss << this->getHelp() << "\n";
-                    throw ParsingError(ss.str());
-                }
                 return false; // Skip optional missing options.
             }
         }
@@ -410,13 +432,8 @@ private:
                 return;
             }
         }
-        // Handle missing required positional argument
-        if (option->required) {
-            std::stringstream ss;
-            ss << "Missing required positional argument: " << option->description << "\n";
-            ss << this->getHelp() << "\n";
-            throw ParsingError(ss.str());
-        }
+        // No longer throwing for missing required positional argument here.
+        // Validation will be handled by validateOptions().
     }
 
     /// @brief Parses a positional list from the command-line arguments.
@@ -451,13 +468,8 @@ private:
                 options.updateLongestValue(option->print_values().length());
             }
         }
-        // Handle missing required positional argument
-        if (option->values.empty() && option->required) {
-            std::stringstream ss;
-            ss << "Missing required positional list argument: " << option->description << "\n";
-            ss << this->getHelp() << "\n";
-            throw ParsingError(ss.str());
-        }
+        // No longer throwing for missing required positional list argument here.
+        // Validation will be handled by validateOptions().
     }
 
     /// @brief Formats a paragraph to fit within a specified line width, applying indentation.

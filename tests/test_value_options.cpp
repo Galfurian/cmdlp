@@ -53,6 +53,8 @@ int main(int, char *[])
 
     // Parsing options
     parser.parseOptions();
+    // Validate options (should not throw for this test as no required options are missing)
+    parser.validateOptions();
 
     // Testing parsed options
     if (!test_option(parser, parser.getOption<double>("--double"), 0.00006456))

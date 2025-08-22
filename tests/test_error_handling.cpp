@@ -43,9 +43,10 @@ int main(int, char *[])
             std::vector<std::string> args = {"test_error_handling"};
             cmdlp::Parser parser(args);
             parser.addOption("-r", "--required", "A required option", true);
-            parser.parseOptions();
+            parser.parseOptions(); // This will no longer throw
+            parser.validateOptions(); // This should now throw
         },
-        "Cannot find required option: --required");
+        "Missing required option: --required"); // Updated message
 
     // Test 2: Missing required positional option
     std::cout << "--- Test: Missing required positional option ---\n";
@@ -54,7 +55,8 @@ int main(int, char *[])
             std::vector<std::string> args = {"test_error_handling"};
             cmdlp::Parser parser(args);
             parser.addPositionalOption("-p", "--pos", "A required positional argument", true);
-            parser.parseOptions();
+            parser.parseOptions(); // This will no longer throw
+            parser.validateOptions(); // This should now throw
         },
         "Missing required positional argument: A required positional argument");
 
@@ -65,7 +67,8 @@ int main(int, char *[])
             std::vector<std::string> args = {"test_error_handling"};
             cmdlp::Parser parser(args);
             parser.addPositionalList("-l", "--list", "A required positional list", true);
-            parser.parseOptions();
+            parser.parseOptions(); // This will no longer throw
+            parser.validateOptions(); // This should now throw
         },
         "Missing required positional list argument: A required positional list");
 

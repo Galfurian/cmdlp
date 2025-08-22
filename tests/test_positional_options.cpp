@@ -32,6 +32,8 @@ int main(int, char *[])
 
     // Parsing options
     parser.parseOptions();
+    // Validate options (should not throw for this test as all required positional options are provided)
+    parser.validateOptions();
 
     // Testing positional options
     if (!test_option(parser, parser.getOption<std::string>("--input"), "input.txt"))

@@ -29,11 +29,32 @@ int main(int argc, char *argv[])
     parser.addSeparator("Positional options:");
     parser.addPositionalOption("-i", "--input", "Input file.", true);
 
-    // Parse options.
-    parser.parseOptions();
-    std::cout << std::string(40, '=') << "\n";
-    std::cout << parser.getHelp() << "\n";
-    std::cout << std::string(40, '=') << "\n";
+    try {
+        // Parse options. This will not throw for missing required options.
+        parser.parseOptions();
+
+        // Application-level help handling
+        if (parser.getOption<bool>("--help")) {
+            std::cout << std::string(40, '=') << "\n";
+            std::cout << parser.getHelp() << "\n";
+            std::cout << std::string(40, '=') << "\n";
+            return 0; // Exit after showing help
+        }
+
+        // Validate options. This will throw if required options are missing.
+        parser.validateOptions();
+
+        std::cout << std::string(40, '=') << "\n";
+        std::cout << parser.getHelp() << "\n";
+        std::cout << std::string(40, '=') << "\n";
+
+    } catch (const cmdlp::ParsingError &e) {
+        std::cerr << "Error: " << e.what() << "\n";
+        return 1; // Exit with error code
+    } catch (const cmdlp::detail::BadConversion &e) {
+        std::cerr << "Conversion Error: " << e.what() << "\n";
+        return 1; // Exit with error code
+    }
 
     // Retrieve and display parsed options.
     std::cout << "Parsed options:\n";
