@@ -160,8 +160,38 @@ public:
             }
         }
 
-        // Add the option to the list of options.
-        options.push_back(option);
+        // Determine the type of the option for ordering.
+        bool is_positional_list = (std::dynamic_pointer_cast<PositionalList>(option) != nullptr);
+        bool is_positional      = (std::dynamic_pointer_cast<PositionalOption>(option) != nullptr);
+
+        if (is_positional_list) {
+            // Always insert PositionalList at the very end (after any existing PositionalList, if any).
+            // Remove any existing PositionalList and re-add it after this one.
+            auto it = std::remove_if(options.begin(), options.end(), [](const std::shared_ptr<Option> &opt) {
+                return std::dynamic_pointer_cast<PositionalList>(opt) != nullptr;
+            });
+            std::vector<std::shared_ptr<Option>> removed(it, options.end());
+            options.erase(it, options.end());
+            options.push_back(option);
+            for (const auto &opt : removed) {
+                // Only re-add if not the same as the one we're adding
+                if (opt != option){
+                    options.push_back(opt);
+                }
+            }
+        } else if (is_positional) {
+            // Insert before the first PositionalList, or at the end if none exists.
+            auto it = std::find_if(options.begin(), options.end(), [](const std::shared_ptr<Option> &opt) {
+                return std::dynamic_pointer_cast<PositionalList>(opt) != nullptr;
+            });
+            options.insert(it, option);
+        } else {
+            // Non-positional: insert before the first positional option or PositionalList, or at the end if none exists.
+            auto it = std::find_if(options.begin(), options.end(), [](const std::shared_ptr<Option> &opt) {
+                return std::dynamic_pointer_cast<PositionalOption>(opt) != nullptr || std::dynamic_pointer_cast<PositionalList>(opt) != nullptr;
+            });
+            options.insert(it, option);
+        }
 
         // Update the length of the `longest` parameters.
         longest_short_option = std::max(option->opt_short.length(), longest_short_option);

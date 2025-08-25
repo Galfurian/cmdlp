@@ -73,6 +73,10 @@ public:
     /// @return The length of the value as a `std::size_t`.
     /// @details This method is pure virtual and must be implemented by derived classes.
     virtual auto get_value_length() const -> std::size_t = 0;
+
+    /// @brief Returns the string used to build the usage message.
+    /// @return A string representation of the option.
+    virtual auto get_usage_entry() const -> std::string = 0;
 };
 
 /// @class ValueOption
@@ -128,6 +132,17 @@ public:
     /// @brief Retrieves the length of the value associated with the option.
     /// @return The length of the value as a `std::size_t`.
     auto get_value_length() const -> std::size_t override { return value.size(); }
+
+    auto get_usage_entry() const -> std::string override
+    {
+        std::ostringstream oss;
+        oss << (required ? '\0' : '[') << opt_long;
+        if (!value.empty()) {
+            oss << "=<" << value << ">";
+        }
+        oss << (required ? '\0' : ']');
+        return oss.str();
+    }
 };
 
 /// @class ToggleOption
@@ -176,6 +191,11 @@ public:
     auto get_value_length() const -> std::size_t override
     {
         return 5; // Length of the string "false" or "true".
+    }
+
+    auto get_usage_entry() const -> std::string override
+    {
+        return "[" + opt_long + "]";
     }
 };
 
@@ -271,6 +291,11 @@ public:
         return oss.str();
     }
 
+    auto get_usage_entry() const -> std::string override
+    {
+        return "[" + opt_long + "={" + print_list() + "}]";
+    }
+
 private:
     /// @brief Checks if a value is allowed.
     /// @param value The value to check.
@@ -334,6 +359,11 @@ public:
     /// @brief Retrieves the length of the positional argument's value.
     /// @return The length of the value as a `std::size_t`.
     auto get_value_length() const -> std::size_t override { return value.size(); }
+
+    auto get_usage_entry() const -> std::string override
+    {
+        return "<" + opt_long.substr(2) + ">";
+    }
 };
 
 /// @class PositionalList
@@ -404,6 +434,11 @@ public:
         }
         return oss.str();
     }
+
+    auto get_usage_entry() const -> std::string override
+    {
+        return "<" + opt_long.substr(2) + "...>";
+    }
 };
 
 /// @class Separator
@@ -443,6 +478,11 @@ public:
     /// @brief Retrieves the length of the value associated with the separator.
     /// @return Always returns 0 as separators do not have values.
     auto get_value_length() const -> std::size_t override { return 0; }
+
+    auto get_usage_entry() const -> std::string override
+    {
+        return "";
+    }
 };
 
 } // namespace detail
