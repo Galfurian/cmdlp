@@ -274,36 +274,28 @@ public:
     /// @return A formatted usage string.
     auto getUsage() const -> std::string
     {
-        std::stringstream usage;
-        usage << "Usage: " << tokenizer.front();
-
-        std::vector<std::string> positional_args;
-
-        std::stringstream ss;
+        constexpr std::size_t max_line_length = 80;
+        constexpr std::size_t indent          = 7;
+        std::ostringstream oss;
+        std::string usage_prefix   = "Usage: " + tokenizer.front();
+        std::size_t current_length = usage_prefix.length();
+        oss << usage_prefix;
         for (const auto &option : options) {
-            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
-                ss << ' ' << (vopt->required ? '\0' : '[');
-                ss << vopt->opt_long;
-                if (!vopt->value.empty()) {
-                    ss << "=<" << vopt->value << ">";
-                }
-                ss << (vopt->required ? '\0' : ']');
-            } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
-                ss << " [" << mopt->opt_long << "={" << mopt->print_list() << "}]";
-            } else if (auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
-                ss << " [" << topt->opt_long << "]";
-            } else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                positional_args.push_back("<" + posopt->opt_long.substr(2) + ">");
-            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
-                positional_args.push_back("<" + poslist->opt_long.substr(2) + "...>");
+            if (dynamic_cast<detail::Separator *>(option.get()) != nullptr) {
+                continue; // Skip separators in usage.
             }
+            std::string entry_usage = option->get_usage_entry();
+            if (current_length + entry_usage.length() > max_line_length) {
+                oss << "\n"
+                    << std::string(indent, ' ')
+                    << entry_usage;
+                current_length = indent;
+            } else {
+                oss << " " << entry_usage;
+            }
+            current_length += entry_usage.length() + 1;
         }
-        // Append positional arguments at the end.
-        for (const auto &pos_arg : positional_args) {
-            ss << ' ' << pos_arg;
-        }
-        usage << this->format_paragraph(ss.str(), usage.str().length() + 1, usage.str().length() + 1, 80);
-        return usage.str();
+        return oss.str();
     }
 
     /// @brief Generates a help string for all registered options.
