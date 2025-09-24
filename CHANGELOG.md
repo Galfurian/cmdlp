@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.5.2 (2025-09-24)
+
+- **Fix**:
+  - Correct help formatting alignment and add copilot instructions.
+
 ## 1.5.1 (2025-08-25)
 
 - **Refactor**:
