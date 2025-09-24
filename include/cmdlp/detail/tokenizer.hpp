@@ -72,17 +72,26 @@ public:
     /// @brief Retrieves the value associated with a given option.
     /// @param option The option to search for (e.g., "-o" or "--option").
     /// @return A reference to the value associated with the option, or an empty string if not found.
-    auto getOption(const std::string &option) const -> const std::string &
+    auto getOption(const std::string &option) const -> std::string
     {
-        auto it = std::find(std::next(tokens.begin()), tokens.end(), option);
-        if (it != tokens.end() && isOption(*it)) {
-            ++it;
-            if (it != tokens.end() && !isOption(*it)) {
-                return *it;
+        for (auto it = std::next(tokens.begin()); it != tokens.end(); ++it) {
+            // Case 1: Option followed by a separate value token (e.g., --option value)
+            if (*it == option) {
+                auto next_it = std::next(it);
+                if (next_it != tokens.end() && !isOption(*next_it)) {
+                    return *next_it;
+                }
+            }
+            // Case 2: Long option with an equals sign (e.g., --option=value)
+            else if (option.length() > 2 && option.substr(0, 2) == "--" && it->rfind(option + "=", 0) == 0) {
+                return it->substr(option.length() + 1);
+            }
+            // Case 3: Short option with concatenated value (e.g., -ovalue)
+            else if (option.length() == 2 && option.substr(0, 1) == "-" && it->rfind(option, 0) == 0 && it->length() > 2) {
+                return it->substr(2);
             }
         }
-        static const std::string empty_string;
-        return empty_string;
+        return "";
     }
 
     /// @brief Checks if a given option exists in the arguments.
