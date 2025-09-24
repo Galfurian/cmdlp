@@ -306,7 +306,11 @@ public:
     {
         std::stringstream ss;
         // Pre-compute the maximum length of the short+long+value for all options.
-        std::size_t max_length        = options.getLongestShortOption<int>() + options.getLongestLongOption<int>() + options.getLongestValue<int>() + 4;
+        std::size_t max_length =
+            4U +
+            options.getLongestShortOption<std::size_t>() +
+            options.getLongestLongOption<std::size_t>() +
+            options.getLongestValue<std::size_t>();
         // If the max length is above 40, we need to move all options description to the next line.
         bool description_on_next_line = max_length > 40;
 
