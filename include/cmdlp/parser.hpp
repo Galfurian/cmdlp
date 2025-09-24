@@ -15,12 +15,25 @@
 
 enum : unsigned char {
     CMDLP_MAJOR_VERSION = 1, ///< Major version of the library.
-    CMDLP_MINOR_VERSION = 4, ///< Minor version of the library.
-    CMDLP_MICRO_VERSION = 0  ///< Micro version of the library.
+    CMDLP_MINOR_VERSION = 5, ///< Minor version of the library.
+    CMDLP_MICRO_VERSION = 2  ///< Micro version of the library.
 };
 
 namespace cmdlp
 {
+
+/// @class ParsingError
+/// @brief Exception thrown when a parsing error occurs.
+class ParsingError : public std::runtime_error
+{
+public:
+    /// @brief Constructs a ParsingError exception.
+    /// @param message The error message.
+    explicit ParsingError(const std::string &message)
+        : std::runtime_error(message)
+    {
+    }
+};
 
 /// @class Parser
 /// @brief A class to define, parse, and manage command-line options.
@@ -204,6 +217,34 @@ public:
         return options.getOption<T>(opt);
     }
 
+    /// @brief Validates the parsed options, ensuring all required options are present.
+    /// @details This method should be called after parseOptions() to perform validation.
+    /// It will throw a ParsingError if any required options are missing.
+    void validateOptions() const
+    {
+        for (const auto &option : options) {
+            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
+                if (vopt->required && vopt->value.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required option: " << vopt->opt_long << " [" << vopt->opt_short << "]";
+                    throw ParsingError(ss.str());
+                }
+            } else if (auto popt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
+                if (popt->required && popt->value.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required positional argument: " << popt->description;
+                    throw ParsingError(ss.str());
+                }
+            } else if (auto plopt = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
+                if (plopt->required && plopt->values.empty()) {
+                    std::stringstream ss;
+                    ss << "Missing required positional list argument: " << plopt->description;
+                    throw ParsingError(ss.str());
+                }
+            }
+        }
+    }
+
     /// @brief Parses the registered options from the command-line arguments.
     /// @details Reads the command-line arguments and assigns values to the corresponding options.
     /// If a required option is missing, the program will print an error and exit.
@@ -233,36 +274,28 @@ public:
     /// @return A formatted usage string.
     auto getUsage() const -> std::string
     {
-        std::stringstream usage;
-        usage << "Usage: " << tokenizer.front();
-
-        std::vector<std::string> positional_args;
-
-        std::stringstream ss;
+        constexpr std::size_t max_line_length = 80;
+        constexpr std::size_t indent          = 7;
+        std::ostringstream oss;
+        std::string usage_prefix   = "Usage: " + tokenizer.front();
+        std::size_t current_length = usage_prefix.length();
+        oss << usage_prefix;
         for (const auto &option : options) {
-            if (auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option)) {
-                ss << ' ' << (vopt->required ? '\0' : '[');
-                ss << vopt->opt_long;
-                if (!vopt->value.empty()) {
-                    ss << "=<" << vopt->value << ">";
-                }
-                ss << (vopt->required ? '\0' : ']');
-            } else if (auto mopt = std::dynamic_pointer_cast<detail::MultiOption>(option)) {
-                ss << " [" << mopt->opt_long << "={" << mopt->print_list() << "}]";
-            } else if (auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option)) {
-                ss << " [" << topt->opt_long << "]";
-            } else if (auto posopt = std::dynamic_pointer_cast<detail::PositionalOption>(option)) {
-                positional_args.push_back("<" + posopt->opt_long.substr(2) + ">");
-            } else if (auto poslist = std::dynamic_pointer_cast<detail::PositionalList>(option)) {
-                positional_args.push_back("<" + poslist->opt_long.substr(2) + "...>");
+            if (dynamic_cast<detail::Separator *>(option.get()) != nullptr) {
+                continue; // Skip separators in usage.
             }
+            std::string entry_usage = option->get_usage_entry();
+            if (current_length + entry_usage.length() > max_line_length) {
+                oss << "\n"
+                    << std::string(indent, ' ')
+                    << entry_usage;
+                current_length = indent;
+            } else {
+                oss << " " << entry_usage;
+            }
+            current_length += entry_usage.length() + 1;
         }
-        // Append positional arguments at the end.
-        for (const auto &pos_arg : positional_args) {
-            ss << ' ' << pos_arg;
-        }
-        usage << this->format_paragraph(ss.str(), usage.str().length() + 1, usage.str().length() + 1, 80);
-        return usage.str();
+        return oss.str();
     }
 
     /// @brief Generates a help string for all registered options.
@@ -272,11 +305,21 @@ public:
     auto getHelp() const -> std::string
     {
         std::stringstream ss;
+        // Pre-compute the maximum length of the short+long+value for all options.
+        std::size_t max_length =
+            4U +
+            options.getLongestShortOption<std::size_t>() +
+            options.getLongestLongOption<std::size_t>() +
+            options.getLongestValue<std::size_t>();
+        // If the max length is above 40, we need to move all options description to the next line.
+        bool description_on_next_line = max_length > 40;
+
         ss << this->getUsage() << "\n";
         for (const auto &option : options) {
             auto sepr = std::dynamic_pointer_cast<detail::Separator>(option);
             if (sepr) {
-                ss << "\n" << sepr->description << "\n";
+                ss << "\n"
+                   << sepr->description << "\n";
             } else {
                 auto vopt = std::dynamic_pointer_cast<detail::ValueOption>(option);
                 auto topt = std::dynamic_pointer_cast<detail::ToggleOption>(option);
@@ -288,26 +331,31 @@ public:
                 ssopt << " " << std::setw(options.getLongestShortOption<int>()) << std::left << option->opt_short;
                 ssopt << " " << std::setw(options.getLongestLongOption<int>()) << std::left << option->opt_long;
                 ssopt << " " << std::setw(options.getLongestValue<int>()) << std::left;
+
+                auto description = option->description;
                 if (vopt) {
                     ssopt << ((vopt->required && vopt->value.empty()) ? "<req>" : vopt->value);
                 } else if (topt) {
                     ssopt << (topt->toggled ? "true" : "false");
                 } else if (mopt) {
                     ssopt << mopt->value;
+                    description += " [" + mopt->print_list() + "]";
                 } else if (popt) {
                     ssopt << ((popt->required && popt->value.empty()) ? "<req>" : popt->value);
                 } else if (lopt) {
                     ssopt << ((lopt->required && lopt->values.empty()) ? "<req>" : lopt->print_values());
                 }
-                ssopt << " : ";
-                if (mopt != nullptr) {
-                    ssopt << this->format_paragraph(
-                        option->description + " [" + mopt->print_list() + "]", ssopt.str().length(),
-                        ssopt.str().length(), 80);
+                std::size_t initial_offset, tabulation;
+                if (description_on_next_line) {
+                    ssopt << "\n    : ";
+                    initial_offset = 6;
+                    tabulation     = 6;
                 } else {
-                    ssopt << this->format_paragraph(
-                        option->description, ssopt.str().length(), ssopt.str().length(), 80);
+                    ssopt << " : ";
+                    initial_offset = ssopt.str().length();
+                    tabulation     = initial_offset;
                 }
+                ssopt << this->format_paragraph(description, initial_offset, tabulation, 80);
                 ssopt << "\n";
                 ss << ssopt.str();
             }
@@ -325,12 +373,6 @@ private:
         if (value.empty()) {
             value = tokenizer.getOption(option->opt_long);
             if (value.empty()) {
-                if (option->required) {
-                    std::cerr << "Cannot find required option: " << option->opt_long << " [" << option->opt_short
-                              << "]\n";
-                    std::cerr << this->getHelp() << "\n";
-                    std::exit(1); // Exit if required option is missing.
-                }
                 return false; // Skip optional missing options.
             }
         }
@@ -397,12 +439,8 @@ private:
                 return;
             }
         }
-        // Handle missing required positional argument
-        if (option->required) {
-            std::cerr << "Missing required positional argument: " << option->description << "\n";
-            std::cerr << this->getHelp() << "\n";
-            std::exit(1);
-        }
+        // No longer throwing for missing required positional argument here.
+        // Validation will be handled by validateOptions().
     }
 
     /// @brief Parses a positional list from the command-line arguments.
@@ -437,12 +475,8 @@ private:
                 options.updateLongestValue(option->print_values().length());
             }
         }
-        // Handle missing required positional argument
-        if (option->values.empty() && option->required) {
-            std::cerr << "Missing required positional list argument: " << option->description << "\n";
-            std::cerr << this->getHelp() << "\n";
-            std::exit(1);
-        }
+        // No longer throwing for missing required positional list argument here.
+        // Validation will be handled by validateOptions().
     }
 
     /// @brief Formats a paragraph to fit within a specified line width, applying indentation.
@@ -468,7 +502,8 @@ private:
             std::string word(word_start, word_end);
             // Check if adding the word would exceed the max line length.
             if (current_length + word.length() + 1 > max_line_length) {
-                formatted << "\n" << indent;
+                formatted << "\n"
+                          << indent;
                 current_length = tabulation;
             } else if (it != text.begin()) {
                 formatted << ' ';
